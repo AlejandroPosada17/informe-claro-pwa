@@ -1,15 +1,19 @@
 // --- Variables globales ---
-let datosHoja1 = {};
-let datosHoja2 = {};
-let evidencias1 = [null, null, null, null];
-let evidencias2 = [null, null, null, null, null, null];
-let firmas = [null];
+let datosHoja1 = JSON.parse(localStorage.getItem('datosHoja1') || '{}');
+let datosHoja2 = JSON.parse(localStorage.getItem('datosHoja2') || '{}');
+let evidencias1 = datosHoja1.evidencias || [null, null, null, null];
+let evidencias2 = datosHoja2.evidencias || [null, null, null, null, null, null];
+let firmas = [datosHoja1.firma || null];
 
 // --- Utilidades ---
 function toBase64(file, cb) {
   const reader = new FileReader();
   reader.onload = e => cb(reader.result);
   reader.readAsDataURL(file);
+}
+function guardarLocal() {
+  localStorage.setItem('datosHoja1', JSON.stringify(datosHoja1));
+  localStorage.setItem('datosHoja2', JSON.stringify(datosHoja2));
 }
 
 // --- Renderiza la pantalla inicial ---
@@ -19,19 +23,19 @@ function renderHoja1() {
       <img src="logo-claro.png" alt="Logo Claro" style="width:100px;display:block;margin:auto;">
       <h2>Estado General de Estación</h2>
       <label>Nombre de estación*</label>
-      <input name="nombreEstacion" required />
+      <input name="nombreEstacion" required value="${datosHoja1.nombreEstacion||''}" />
       <label>Categoría*</label>
-      <input name="categoria" required />
+      <input name="categoria" required value="${datosHoja1.categoria||''}" />
       <label>Zona*</label>
-      <input name="zona" required />
+      <input name="zona" required value="${datosHoja1.zona||''}" />
       <label>Responsable*</label>
-      <input name="responsable" required />
+      <input name="responsable" required value="${datosHoja1.responsable||''}" />
       <label>Departamento*</label>
-      <input name="departamento" required />
+      <input name="departamento" required value="${datosHoja1.departamento||''}" />
       <label>Fecha de ejecución*</label>
-      <input name="fechaEjecucion" type="date" required />
+      <input name="fechaEjecucion" type="date" required value="${datosHoja1.fechaEjecucion||''}" />
       <label>Dirección*</label>
-      <input name="direccion" required />
+      <input name="direccion" required value="${datosHoja1.direccion||''}" />
       <hr>
       <label>Áreas comunes y locativos</label>
       <table>
@@ -45,7 +49,7 @@ function renderHoja1() {
         <tbody id="tabla-items"></tbody>
       </table>
       <label>Observaciones generales</label>
-      <textarea name="observaciones"></textarea>
+      <textarea name="observaciones">${datosHoja1.observaciones||''}</textarea>
       <hr>
       <label>Evidencias fotográficas</label>
       <div id="evidencias1"></div>
@@ -56,9 +60,9 @@ function renderHoja1() {
         <button type="button" id="limpiarFirma1">Limpiar firma</button>
       </div>
       <label>Nombre*</label>
-      <input name="nombreFuncionario" required />
+      <input name="nombreFuncionario" required value="${datosHoja1.nombreFuncionario||''}" />
       <label>Fecha elaboración informe*</label>
-      <input name="fechaElaboracion" type="date" required />
+      <input name="fechaElaboracion" type="date" required value="${datosHoja1.fechaElaboracion||''}" />
       <button type="submit">Siguiente</button>
     </form>
   `;
@@ -80,18 +84,19 @@ function renderHoja1() {
     "Se encuentran basuras, escombros dentro de la estación?"
   ];
   let html = '';
+  let itemsGuardados = datosHoja1.items || [];
   for (let i = 0; i < items.length; i++) {
     html += `<tr>
       <td>${items[i]}</td>
       <td>
         <select name="item${i}" required>
           <option value="">-</option>
-          <option>SÍ</option>
-          <option>NO</option>
+          <option${itemsGuardados[i]?.respuesta==='SÍ'?' selected':''}>SÍ</option>
+          <option${itemsGuardados[i]?.respuesta==='NO'?' selected':''}>NO</option>
         </select>
       </td>
       <td>
-        <input name="descItem${i}" />
+        <input name="descItem${i}" value="${itemsGuardados[i]?.descripcion||''}" />
       </td>
     </tr>`;
   }
@@ -103,8 +108,8 @@ function renderHoja1() {
     evHtml += `
       <label>Evidencia ${i+1}</label>
       <input type="file" accept="image/*" id="foto1_${i}" />
-      <img id="prev1_${i}" class="preview" style="display:none"/>
-      <input id="desc1_${i}" placeholder="Descripción evidencia ${i+1}" />
+      <img id="prev1_${i}" class="preview" style="display:${evidencias1[i]?'block':'none'}" src="${evidencias1[i]||''}"/>
+      <input id="desc1_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja1.evidencias?.[i]?.desc||''}" />
     `;
   }
   document.getElementById('evidencias1').innerHTML = evHtml;
@@ -115,17 +120,28 @@ function renderHoja1() {
           evidencias1[i] = b64;
           document.getElementById(`prev1_${i}`).src = b64;
           document.getElementById(`prev1_${i}`).style.display = 'block';
+          datosHoja1.evidencias = evidencias1.map((img, idx) => ({img, desc: document.getElementById(`desc1_${idx}`).value}));
+          guardarLocal();
         });
       }
+    };
+    document.getElementById(`desc1_${i}`).oninput = () => {
+      datosHoja1.evidencias = evidencias1.map((img, idx) => ({img, desc: document.getElementById(`desc1_${idx}`).value}));
+      guardarLocal();
     };
   }
 
   // Firma
   let canvas = document.getElementById('firma1');
   let ctx = canvas.getContext('2d');
+  if (firmas[0]) {
+    let img = new window.Image();
+    img.onload = () => ctx.drawImage(img, 0, 0, 300, 80);
+    img.src = firmas[0];
+  }
   let drawing = false;
   canvas.onmousedown = e => { drawing = true; ctx.beginPath(); };
-  canvas.onmouseup = e => { drawing = false; firmas[0] = canvas.toDataURL(); };
+  canvas.onmouseup = e => { drawing = false; firmas[0] = canvas.toDataURL(); datosHoja1.firma = firmas[0]; guardarLocal(); };
   canvas.onmousemove = e => {
     if (!drawing) return;
     let rect = canvas.getBoundingClientRect();
@@ -139,7 +155,7 @@ function renderHoja1() {
   };
   // Touch
   canvas.addEventListener('touchstart', e => { drawing = true; ctx.beginPath(); });
-  canvas.addEventListener('touchend', e => { drawing = false; firmas[0] = canvas.toDataURL(); });
+  canvas.addEventListener('touchend', e => { drawing = false; firmas[0] = canvas.toDataURL(); datosHoja1.firma = firmas[0]; guardarLocal(); });
   canvas.addEventListener('touchmove', e => {
     if (!drawing) return;
     let rect = canvas.getBoundingClientRect();
@@ -156,7 +172,27 @@ function renderHoja1() {
   document.getElementById('limpiarFirma1').onclick = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     firmas[0] = null;
+    datosHoja1.firma = null;
+    guardarLocal();
   };
+
+  // Guardado en cada cambio
+  Array.from(document.querySelectorAll('#form1 input, #form1 textarea, #form1 select')).forEach(el => {
+    el.oninput = () => {
+      const fd = new FormData(document.getElementById('form1'));
+      datosHoja1 = Object.fromEntries(fd.entries());
+      datosHoja1.items = [];
+      for (let i = 0; i < items.length; i++) {
+        datosHoja1.items.push({
+          respuesta: fd.get(`item${i}`),
+          descripcion: fd.get(`descItem${i}`)
+        });
+      }
+      datosHoja1.evidencias = evidencias1.map((img, idx) => ({img, desc: document.getElementById(`desc1_${idx}`).value}));
+      datosHoja1.firma = firmas[0];
+      guardarLocal();
+    };
+  });
 
   // Submit
   document.getElementById('form1').onsubmit = e => {
@@ -170,14 +206,9 @@ function renderHoja1() {
         descripcion: fd.get(`descItem${i}`)
       });
     }
-    datosHoja1.evidencias = [];
-    for (let i = 0; i < 4; i++) {
-      datosHoja1.evidencias.push({
-        img: evidencias1[i],
-        desc: document.getElementById(`desc1_${i}`).value
-      });
-    }
+    datosHoja1.evidencias = evidencias1.map((img, idx) => ({img, desc: document.getElementById(`desc1_${idx}`).value}));
     datosHoja1.firma = firmas[0];
+    guardarLocal();
     renderHoja2();
   };
 }
@@ -187,78 +218,78 @@ function renderHoja2() {
     <form id="form2">
       <h2>Actividad Técnica en Estación</h2>
       <label>Regional*</label>
-      <input name="regional" required />
+      <input name="regional" required value="${datosHoja2.regional||''}" />
       <label>Tipo de estación*</label>
       <select name="tipoEstacion" required>
         <option value="">Tipo de estación</option>
-        <option>TORRE CUADRADA</option>
-        <option>TORRE TRIANGULAR</option>
-        <option>MONOPOLO</option>
-        <option>TERRAZA</option>
-        <option>POSTE</option>
-        <option>INDOOR</option>
-        <option>VALLA</option>
+        <option${datosHoja2.tipoEstacion==='TORRE CUADRADA'?' selected':''}>TORRE CUADRADA</option>
+        <option${datosHoja2.tipoEstacion==='TORRE TRIANGULAR'?' selected':''}>TORRE TRIANGULAR</option>
+        <option${datosHoja2.tipoEstacion==='MONOPOLO'?' selected':''}>MONOPOLO</option>
+        <option${datosHoja2.tipoEstacion==='TERRAZA'?' selected':''}>TERRAZA</option>
+        <option${datosHoja2.tipoEstacion==='POSTE'?' selected':''}>POSTE</option>
+        <option${datosHoja2.tipoEstacion==='INDOOR'?' selected':''}>INDOOR</option>
+        <option${datosHoja2.tipoEstacion==='VALLA'?' selected':''}>VALLA</option>
       </select>
       <label>Fecha ejecución*</label>
-      <input name="fechaEjecucion" type="date" required />
+      <input name="fechaEjecucion" type="date" required value="${datosHoja2.fechaEjecucion||''}" />
       <label>Tipo de sitio*</label>
       <select name="tipoSitio" required>
         <option value="">Tipo de sitio</option>
-        <option>PROPIO</option>
-        <option>ARRENDADO</option>
+        <option${datosHoja2.tipoSitio==='PROPIO'?' selected':''}>PROPIO</option>
+        <option${datosHoja2.tipoSitio==='ARRENDADO'?' selected':''}>ARRENDADO</option>
       </select>
       <label>Fecha fin de actividad*</label>
-      <input name="fechaFinActividad" type="date" required />
+      <input name="fechaFinActividad" type="date" required value="${datosHoja2.fechaFinActividad||''}" />
       <label>Técnico*</label>
-      <input name="tecnico" required />
+      <input name="tecnico" required value="${datosHoja2.tecnico||''}" />
       <label>¿Implica exclusión?*</label>
       <select name="exclusion" required>
         <option value="">¿Implica exclusión?</option>
-        <option>SÍ</option>
-        <option>NO</option>
+        <option${datosHoja2.exclusion==='SÍ'?' selected':''}>SÍ</option>
+        <option${datosHoja2.exclusion==='NO'?' selected':''}>NO</option>
       </select>
       <label>Tipo de actividad*</label>
       <select name="tipoActividad" required>
         <option value="">Tipo de actividad</option>
-        <option>EMERGENCIA</option>
-        <option>CORRECTIVO</option>
+        <option${datosHoja2.tipoActividad==='EMERGENCIA'?' selected':''}>EMERGENCIA</option>
+        <option${datosHoja2.tipoActividad==='CORRECTIVO'?' selected':''}>CORRECTIVO</option>
       </select>
       <label>Tipo de equipo en falla*</label>
       <select name="tipoEquipoFalla" required>
         <option value="">Tipo de equipo en falla</option>
-        <option>TX</option>
-        <option>ENERGÍA</option>
-        <option>HARDWARE</option>
-        <option>SOFTWARE</option>
-        <option>HURTO</option>
-        <option>CLIMATICOS</option>
+        <option${datosHoja2.tipoEquipoFalla==='TX'?' selected':''}>TX</option>
+        <option${datosHoja2.tipoEquipoFalla==='ENERGÍA'?' selected':''}>ENERGÍA</option>
+        <option${datosHoja2.tipoEquipoFalla==='HARDWARE'?' selected':''}>HARDWARE</option>
+        <option${datosHoja2.tipoEquipoFalla==='SOFTWARE'?' selected':''}>SOFTWARE</option>
+        <option${datosHoja2.tipoEquipoFalla==='HURTO'?' selected':''}>HURTO</option>
+        <option${datosHoja2.tipoEquipoFalla==='CLIMATICOS'?' selected':''}>CLIMATICOS</option>
       </select>
       <label>Marca</label>
-      <input name="marca" />
+      <input name="marca" value="${datosHoja2.marca||''}" />
       <label>Modelo</label>
-      <input name="modelo" />
+      <input name="modelo" value="${datosHoja2.modelo||''}" />
       <label>¿Presenta afectación de servicios?*</label>
       <select name="afectacionServicios" required>
         <option value="">¿Presenta afectación de servicios?</option>
-        <option>SÍ</option>
-        <option>NO</option>
+        <option${datosHoja2.afectacionServicios==='SÍ'?' selected':''}>SÍ</option>
+        <option${datosHoja2.afectacionServicios==='NO'?' selected':''}>NO</option>
       </select>
       <label>¿Cambio?*</label>
       <select name="cambio" required>
         <option value="">¿Cambio?</option>
-        <option>SÍ</option>
-        <option>NO</option>
+        <option${datosHoja2.cambio==='SÍ'?' selected':''}>SÍ</option>
+        <option${datosHoja2.cambio==='NO'?' selected':''}>NO</option>
       </select>
       <label>¿Instalación?*</label>
       <select name="instalacion" required>
         <option value="">¿Instalación?</option>
-        <option>SÍ</option>
-        <option>NO</option>
+        <option${datosHoja2.instalacion==='SÍ'?' selected':''}>SÍ</option>
+        <option${datosHoja2.instalacion==='NO'?' selected':''}>NO</option>
       </select>
       <label>Descripción de la falla</label>
-      <textarea name="descripcionFalla"></textarea>
+      <textarea name="descripcionFalla">${datosHoja2.descripcionFalla||''}</textarea>
       <label>Descripción de la solución</label>
-      <textarea name="descripcionSolucion"></textarea>
+      <textarea name="descripcionSolucion">${datosHoja2.descripcionSolucion||''}</textarea>
       <hr>
       <label>Repuestos retirados/instalados</label>
       <table>
@@ -280,17 +311,17 @@ function renderHoja2() {
       <label>¿Falla resuelta?*</label>
       <select name="fallaResuelta" required>
         <option value="">¿Falla resuelta?</option>
-        <option>SÍ</option>
-        <option>NO</option>
+        <option${datosHoja2.fallaResuelta==='SÍ'?' selected':''}>SÍ</option>
+        <option${datosHoja2.fallaResuelta==='NO'?' selected':''}>NO</option>
       </select>
       <label>Observaciones de la actividad</label>
-      <textarea name="observacionesActividad"></textarea>
+      <textarea name="observacionesActividad">${datosHoja2.observacionesActividad||''}</textarea>
       <button type="submit">Generar PDF</button>
       <button type="button" id="volver1">Volver</button>
     </form>
   `;
   // Repuestos
-  let repuestos = [];
+  let repuestos = datosHoja2.repuestos || [];
   function renderRepuestos() {
     let html = '';
     for (let i = 0; i < repuestos.length; i++) {
@@ -309,6 +340,8 @@ function renderHoja2() {
   document.getElementById('agregarRepuesto').onclick = () => {
     repuestos.push({descripcion:'',marca:'',modelo:'',serial:''});
     renderRepuestos();
+    datosHoja2.repuestos = repuestos;
+    guardarLocal();
   };
   renderRepuestos();
 
@@ -318,8 +351,8 @@ function renderHoja2() {
     evHtml += `
       <label>Evidencia ${i+1}</label>
       <input type="file" accept="image/*" id="foto2_${i}" />
-      <img id="prev2_${i}" class="preview" style="display:none"/>
-      <input id="desc2_${i}" placeholder="Descripción evidencia ${i+1}" />
+      <img id="prev2_${i}" class="preview" style="display:${evidencias2[i]?'block':'none'}" src="${evidencias2[i]||''}"/>
+      <input id="desc2_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja2.evidencias?.[i]?.desc||''}" />
     `;
   }
   document.getElementById('evidencias2').innerHTML = evHtml;
@@ -330,10 +363,27 @@ function renderHoja2() {
           evidencias2[i] = b64;
           document.getElementById(`prev2_${i}`).src = b64;
           document.getElementById(`prev2_${i}`).style.display = 'block';
+          datosHoja2.evidencias = evidencias2.map((img, idx) => ({img, desc: document.getElementById(`desc2_${idx}`).value}));
+          guardarLocal();
         });
       }
     };
+    document.getElementById(`desc2_${i}`).oninput = () => {
+      datosHoja2.evidencias = evidencias2.map((img, idx) => ({img, desc: document.getElementById(`desc2_${idx}`).value}));
+      guardarLocal();
+    };
   }
+
+  // Guardado en cada cambio
+  Array.from(document.querySelectorAll('#form2 input, #form2 textarea, #form2 select')).forEach(el => {
+    el.oninput = () => {
+      const fd = new FormData(document.getElementById('form2'));
+      datosHoja2 = Object.fromEntries(fd.entries());
+      datosHoja2.repuestos = repuestos;
+      datosHoja2.evidencias = evidencias2.map((img, idx) => ({img, desc: document.getElementById(`desc2_${idx}`).value}));
+      guardarLocal();
+    };
+  });
 
   // Submit
   document.getElementById('form2').onsubmit = e => {
@@ -341,147 +391,215 @@ function renderHoja2() {
     const fd = new FormData(e.target);
     datosHoja2 = Object.fromEntries(fd.entries());
     datosHoja2.repuestos = repuestos;
-    datosHoja2.evidencias = [];
-    for (let i = 0; i < 6; i++) {
-      datosHoja2.evidencias.push({
-        img: evidencias2[i],
-        desc: document.getElementById(`desc2_${i}`).value
-      });
-    }
-    renderPdf();
+    datosHoja2.evidencias = evidencias2.map((img, idx) => ({img, desc: document.getElementById(`desc2_${idx}`).value}));
+    guardarLocal();
+    renderPrevisualizacion();
   };
   document.getElementById('volver1').onclick = renderHoja1;
 }
 
-function renderPdf() {
+function renderPrevisualizacion() {
   document.getElementById('app').innerHTML = `
-    <h2>Previsualización PDF</h2>
-    <div id="pdf-preview"></div>
+    <h2>Previsualización del informe</h2>
+    <div class="previsualizacion-pdf" id="previsualizacion-pdf">
+      <div id="html-pagina1"></div>
+      <div id="html-pagina2"></div>
+    </div>
     <button id="descargar">Descargar PDF</button>
-    <button id="volver2">Volver a editar</button>
+    <button id="editar">Editar datos</button>
   `;
+
+  // Renderiza el HTML institucional con los datos
+  renderHtmlInstitucional('html-pagina1', datosHoja1, datosHoja2, 1);
+  renderHtmlInstitucional('html-pagina2', datosHoja1, datosHoja2, 2);
+
+  // Previsualización como imagen
   setTimeout(() => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({unit:'pt',format:'a4'});
-    // Logo
-    const img = new Image();
-    img.src = 'logo-claro.png';
-    img.onload = () => {
-      doc.addImage(img, 'PNG', 30, 30, 60, 60);
-      doc.setFont('Arial','bold');
-      doc.setTextColor(227,6,19);
-      doc.setFontSize(16);
-      doc.text('CLARO OPERACIÓN Y MANTENIMIENTO', 110, 50);
-      doc.setFontSize(13);
-      doc.text('ESTADO GENERAL DE SITIO', 110, 70);
-      doc.setFontSize(10);
-      doc.setTextColor(0,0,0);
-      let y = 100;
-      // Hoja 1
-      [
-        ['Nombre de estación', datosHoja1.nombreEstacion],
-        ['Categoría', datosHoja1.categoria],
-        ['Zona', datosHoja1.zona],
-        ['Responsable', datosHoja1.responsable],
-        ['Departamento', datosHoja1.departamento],
-        ['Fecha de ejecución', datosHoja1.fechaEjecucion],
-        ['Dirección', datosHoja1.direccion]
-      ].forEach(([k,v]) => { doc.text(`${k}: ${v||''}`, 30, y); y+=16; });
-      y+=8;
-      doc.setTextColor(227,6,19);
-      doc.text('ÁREAS COMUNES Y LOCATIVOS', 30, y); y+=14;
-      doc.setTextColor(0,0,0);
-      datosHoja1.items.forEach((item,i) => {
-        doc.text(`${i+1}. ${item.respuesta||'-'} - ${item.descripcion||''}`, 35, y);
-        y+=12;
+    html2canvas(document.getElementById('html-pagina1'), {backgroundColor: "#fff"}).then(canvas1 => {
+      document.getElementById('html-pagina1').innerHTML = '';
+      document.getElementById('html-pagina1').appendChild(canvas1);
+      html2canvas(document.getElementById('html-pagina2'), {backgroundColor: "#fff"}).then(canvas2 => {
+        document.getElementById('html-pagina2').innerHTML = '';
+        document.getElementById('html-pagina2').appendChild(canvas2);
       });
-      y+=8;
-      doc.text('Observaciones generales:', 30, y); y+=12;
-      doc.text(datosHoja1.observaciones||'', 35, y); y+=20;
-      // Evidencias
-      for (let i = 0; i < 4; i++) {
-        if (datosHoja1.evidencias[i].img) {
-          doc.addImage(datosHoja1.evidencias[i].img, 'JPEG', 30+(i*120), y, 100, 60);
-          doc.text(datosHoja1.evidencias[i].desc||'', 30+(i*120), y+70);
-        }
-      }
-      y+=90;
-      // Firma
-      if (datosHoja1.firma) {
-        doc.addImage(datosHoja1.firma, 'PNG', 30, y, 120, 40);
-        doc.text('Firma funcionario:', 30, y+50);
-        doc.text(datosHoja1.nombreFuncionario||'', 160, y+50);
-        doc.text('Fecha elaboración informe:', 30, y+65);
-        doc.text(datosHoja1.fechaElaboracion||'', 160, y+65);
-      }
-      // Pie de página
-      doc.setTextColor(227,6,19);
-      doc.setFontSize(10);
-      doc.text('Clasificación: Uso Interno. Documento Claro Colombia', 30, 820);
+    });
+  }, 500);
 
-      // Segunda hoja
-      doc.addPage();
-      let y2 = 50;
-      doc.addImage(img, 'PNG', 30, 30, 60, 60);
-      doc.setFont('Arial','bold');
-      doc.setTextColor(227,6,19);
-      doc.setFontSize(16);
-      doc.text('ACTIVIDAD TÉCNICA EN ESTACIÓN', 110, 50);
-      doc.setFontSize(10);
-      doc.setTextColor(0,0,0);
-      [
-        ['Regional', datosHoja2.regional],
-        ['Tipo de estación', datosHoja2.tipoEstacion],
-        ['Fecha ejecución', datosHoja2.fechaEjecucion],
-        ['Tipo de sitio', datosHoja2.tipoSitio],
-        ['Fecha fin de actividad', datosHoja2.fechaFinActividad],
-        ['Técnico', datosHoja2.tecnico],
-        ['¿Implica exclusión?', datosHoja2.exclusion],
-        ['Tipo de actividad', datosHoja2.tipoActividad],
-        ['Tipo de equipo en falla', datosHoja2.tipoEquipoFalla],
-        ['Marca', datosHoja2.marca],
-        ['Modelo', datosHoja2.modelo],
-        ['¿Presenta afectación de servicios?', datosHoja2.afectacionServicios],
-        ['¿Cambio?', datosHoja2.cambio],
-        ['¿Instalación?', datosHoja2.instalacion]
-      ].forEach(([k,v]) => { doc.text(`${k}: ${v||''}`, 30, y2); y2+=16; });
-      y2+=8;
-      doc.text('Descripción de la falla:', 30, y2); y2+=12;
-      doc.text(datosHoja2.descripcionFalla||'', 35, y2); y2+=16;
-      doc.text('Descripción de la solución:', 30, y2); y2+=12;
-      doc.text(datosHoja2.descripcionSolucion||'', 35, y2); y2+=16;
-      // Repuestos
-      doc.setTextColor(227,6,19);
-      doc.text('Repuestos retirados/instalados:', 30, y2); y2+=14;
-      doc.setTextColor(0,0,0);
-      (datosHoja2.repuestos||[]).forEach((rep,i) => {
-        doc.text(`${i+1}. ${rep.descripcion||''} | ${rep.marca||''} | ${rep.modelo||''} | ${rep.serial||''}`, 35, y2);
-        y2+=12;
+  document.getElementById('descargar').onclick = () => {
+    generarPDF(datosHoja1, datosHoja2, () => {
+      // Limpia localStorage al descargar
+      localStorage.removeItem('datosHoja1');
+      localStorage.removeItem('datosHoja2');
+      setTimeout(() => {
+        datosHoja1 = {};
+        datosHoja2 = {};
+        evidencias1 = [null, null, null, null];
+        evidencias2 = [null, null, null, null, null, null];
+        firmas = [null];
+        renderHoja1();
+      }, 1000);
+    });
+  };
+  document.getElementById('editar').onclick = renderHoja1;
+}
+
+// --- Renderiza el HTML institucional con los datos ---
+function renderHtmlInstitucional(divId, hoja1, hoja2, pagina) {
+  // Aquí debes adaptar el HTML institucional que me pasaste, usando los datos de hoja1 y hoja2
+  // Por simplicidad, te muestro un ejemplo de cómo hacerlo con los campos principales.
+  // Puedes expandirlo con el resto de los campos y tablas según tu formato.
+  let html = '';
+  if (pagina === 1) {
+    html = `
+      <div style="width:700px;min-height:990px;border:1px solid #e30613;padding:32px 32px 60px 32px;box-sizing:border-box;position:relative;background:#fff;">
+        <img src="logo-claro.png" style="width:70px;position:absolute;top:32px;left:32px;">
+        <div style="text-align:center;font-weight:bold;font-size:18px;color:#e30613;">CLARO OPERACIÓN Y MANTENIMIENTO<br>ESTADO GENERAL DE SITIO</div>
+        <table style="width:100%;margin-top:32px;">
+          <tr>
+            <td><b>Nombre de estación:</b> ${hoja1.nombreEstacion||''}</td>
+            <td><b>Categoría:</b> ${hoja1.categoria||''}</td>
+            <td><b>Zona:</b> ${hoja1.zona||''}</td>
+          </tr>
+          <tr>
+            <td><b>Responsable:</b> ${hoja1.responsable||''}</td>
+            <td><b>Departamento:</b> ${hoja1.departamento||''}</td>
+            <td><b>Fecha de ejecución:</b> ${hoja1.fechaEjecucion||''}</td>
+          </tr>
+          <tr>
+            <td colspan="3"><b>Dirección:</b> ${hoja1.direccion||''}</td>
+          </tr>
+        </table>
+        <div style="margin-top:16px;font-weight:bold;color:#e30613;">ÁREAS COMUNES Y LOCATIVOS</div>
+        <table style="width:100%;font-size:11px;">
+          <tr>
+            <th>Ítem</th>
+            <th>¿Sí/No?</th>
+            <th>Descripción</th>
+          </tr>
+          ${hoja1.items?.map((item,i)=>`
+            <tr>
+              <td>${i+1}</td>
+              <td>${item.respuesta||''}</td>
+              <td>${item.descripcion||''}</td>
+            </tr>
+          `).join('')}
+        </table>
+        <div style="margin-top:8px;"><b>Observaciones generales:</b> ${hoja1.observaciones||''}</div>
+        <div style="margin-top:16px;font-weight:bold;color:#e30613;">EVIDENCIA FOTOGRÁFICA</div>
+        <div style="display:flex;gap:8px;">
+          ${hoja1.evidencias?.map(ev=>ev.img?`<div><img src="${ev.img}" style="width:120px;height:80px;object-fit:cover;"><div style="font-size:10px;">${ev.desc||''}</div></div>`:'').join('')}
+        </div>
+        <div style="margin-top:16px;">
+          <b>Firma funcionario:</b><br>
+          ${hoja1.firma?`<img src="${hoja1.firma}" style="width:120px;height:40px;">`:''}
+        </div>
+        <div><b>Nombre:</b> ${hoja1.nombreFuncionario||''}</div>
+        <div><b>Fecha elaboración informe:</b> ${hoja1.fechaElaboracion||''}</div>
+        <div style="position:absolute;bottom:16px;left:32px;color:#e30613;font-size:11px;">Clasificación: Uso Interno. Documento Claro Colombia</div>
+      </div>
+    `;
+  } else {
+    html = `
+      <div style="width:700px;min-height:990px;border:1px solid #e30613;padding:32px 32px 60px 32px;box-sizing:border-box;position:relative;background:#fff;">
+        <img src="logo-claro.png" style="width:70px;position:absolute;top:32px;left:32px;">
+        <div style="text-align:center;font-weight:bold;font-size:18px;color:#e30613;">ACTIVIDAD TÉCNICA EN ESTACIÓN</div>
+        <table style="width:100%;margin-top:32px;">
+          <tr>
+            <td><b>Regional:</b> ${hoja2.regional||''}</td>
+            <td><b>Tipo de estación:</b> ${hoja2.tipoEstacion||''}</td>
+            <td><b>Fecha ejecución:</b> ${hoja2.fechaEjecucion||''}</td>
+          </tr>
+          <tr>
+            <td><b>Tipo de sitio:</b> ${hoja2.tipoSitio||''}</td>
+            <td><b>Fecha fin actividad:</b> ${hoja2.fechaFinActividad||''}</td>
+            <td><b>Técnico:</b> ${hoja2.tecnico||''}</td>
+          </tr>
+          <tr>
+            <td><b>¿Implica exclusión?:</b> ${hoja2.exclusion||''}</td>
+            <td><b>Tipo de actividad:</b> ${hoja2.tipoActividad||''}</td>
+            <td><b>Tipo de equipo en falla:</b> ${hoja2.tipoEquipoFalla||''}</td>
+          </tr>
+          <tr>
+            <td><b>Marca:</b> ${hoja2.marca||''}</td>
+            <td><b>Modelo:</b> ${hoja2.modelo||''}</td>
+            <td><b>¿Presenta afectación de servicios?:</b> ${hoja2.afectacionServicios||''}</td>
+          </tr>
+          <tr>
+            <td><b>¿Cambio?:</b> ${hoja2.cambio||''}</td>
+            <td><b>¿Instalación?:</b> ${hoja2.instalacion||''}</td>
+            <td></td>
+          </tr>
+        </table>
+        <div style="margin-top:8px;"><b>Descripción de la falla:</b> ${hoja2.descripcionFalla||''}</div>
+        <div style="margin-top:8px;"><b>Descripción de la solución:</b> ${hoja2.descripcionSolucion||''}</div>
+        <div style="margin-top:16px;font-weight:bold;color:#e30613;">CAMBIO DE REPUESTOS Y/O PARTES</div>
+        <table style="width:100%;font-size:11px;">
+          <tr>
+            <th>Descripción</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Serial</th>
+          </tr>
+          ${(hoja2.repuestos||[]).map(rep=>`
+            <tr>
+              <td>${rep.descripcion||''}</td>
+              <td>${rep.marca||''}</td>
+              <td>${rep.modelo||''}</td>
+              <td>${rep.serial||''}</td>
+            </tr>
+          `).join('')}
+        </table>
+        <div style="margin-top:16px;font-weight:bold;color:#e30613;">EVIDENCIA FOTOGRÁFICA DE LA ACTIVIDAD</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          ${(hoja2.evidencias||[]).map(ev=>ev.img?`<div><img src="${ev.img}" style="width:120px;height:80px;object-fit:cover;"><div style="font-size:10px;">${ev.desc||''}</div></div>`:'').join('')}
+        </div>
+        <div style="margin-top:8px;"><b>¿Falla resuelta?:</b> ${hoja2.fallaResuelta||''}</div>
+        <div><b>Observaciones de la actividad:</b> ${hoja2.observacionesActividad||''}</div>
+        <div style="position:absolute;bottom:16px;left:32px;color:#e30613;font-size:11px;">Clasificación: Uso Interno. Documento Claro Colombia</div>
+      </div>
+    `;
+  }
+  document.getElementById(divId).innerHTML = html;
+}
+
+// --- Genera el PDF con el formato institucional ---
+function generarPDF(hoja1, hoja2, cb) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({unit:'pt',format:[700,990]});
+  // Renderiza el HTML institucional en un div oculto
+  let div1 = document.createElement('div');
+  div1.style.position = 'absolute';
+  div1.style.left = '-9999px';
+  div1.id = 'pdf-html1';
+  document.body.appendChild(div1);
+  let div2 = document.createElement('div');
+  div2.style.position = 'absolute';
+  div2.style.left = '-9999px';
+  div2.id = 'pdf-html2';
+  document.body.appendChild(div2);
+  renderHtmlInstitucional('pdf-html1', hoja1, hoja2, 1);
+  renderHtmlInstitucional('pdf-html2', hoja1, hoja2, 2);
+
+  setTimeout(() => {
+    html2canvas(div1, {backgroundColor: "#fff", scale:2}).then(canvas1 => {
+      html2canvas(div2, {backgroundColor: "#fff", scale:2}).then(canvas2 => {
+        pdf.addImage(canvas1.toDataURL('image/jpeg',0.92), 'JPEG', 0, 0, 700, 990);
+        pdf.addPage([700,990]);
+        pdf.addImage(canvas2.toDataURL('image/jpeg',0.92), 'JPEG', 0, 0, 700, 990);
+        pdf.save('informe-claro.pdf');
+        document.body.removeChild(div1);
+        document.body.removeChild(div2);
+        if (cb) cb();
       });
-      y2+=8;
-      // Evidencias
-      for (let i = 0; i < 6; i++) {
-        if (datosHoja2.evidencias[i].img) {
-          doc.addImage(datosHoja2.evidencias[i].img, 'JPEG', 30+((i%3)*120), y2+Math.floor(i/3)*90, 100, 60);
-          doc.text(datosHoja2.evidencias[i].desc||'', 30+((i%3)*120), y2+Math.floor(i/3)*90+70);
-        }
-      }
-      y2+=200;
-      doc.text('¿Falla resuelta?:', 30, y2); doc.text(datosHoja2.fallaResuelta||'', 150, y2); y2+=16;
-      doc.text('Observaciones de la actividad:', 30, y2); y2+=12;
-      doc.text(datosHoja2.observacionesActividad||'', 35, y2); y2+=16;
-      // Pie de página
-      doc.setTextColor(227,6,19);
-      doc.setFontSize(10);
-      doc.text('Clasificación: Uso Interno. Documento Claro Colombia', 30, 820);
-
-      // Previsualización
-      document.getElementById('pdf-preview').innerHTML = `<iframe width="100%" height="500" src="${doc.output('bloburl')}"></iframe>`;
-      document.getElementById('descargar').onclick = () => doc.save('informe-claro.pdf');
-      document.getElementById('volver2').onclick = renderHoja2;
-    };
+    });
   }, 500);
 }
 
 // Inicia la app
-renderHoja1();
+if (!datosHoja1 || Object.keys(datosHoja1).length === 0) {
+  renderHoja1();
+} else if (!datosHoja2 || Object.keys(datosHoja2).length === 0) {
+  renderHoja2();
+} else {
+  renderPrevisualizacion();
+}
