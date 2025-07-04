@@ -14,11 +14,110 @@
 
   <main>
     <section id="formulario" class="pantalla-activa">
-      <!-- Las secciones del formulario se cargan dinámicamente aquí desde JS -->
+      <form id="form1">
+        <h2>Hoja 1: Estado General</h2>
+        <label>Nombre Estación*<input required name="nombre_estacion" /></label>
+        <label>Categoría*<input required name="categoria" /></label>
+        <label>Zona*<input required name="zona" /></label>
+        <label>Responsable*<input required name="responsable" /></label>
+        <label>Departamento*<input required name="departamento" /></label>
+        <label>Fecha de Ejecución*<input type="date" required name="fecha_ejecucion" /></label>
+        <label>Dirección*<input required name="direccion" /></label>
+
+        <h3>Tabla de 13 ítems</h3>
+        <div id="tabla13">
+          <!-- Se genera por JS -->
+        </div>
+
+        <label>Observaciones Generales<textarea name="obs_generales"></textarea></label>
+
+        <h3>Evidencias (fotos + descripción)</h3>
+        <div class="evidencias">
+          <label>Foto 1<input type="file" accept="image/*" capture="environment" name="foto1" /></label>
+          <input name="desc1" placeholder="Descripción foto 1" />
+          <label>Foto 2<input type="file" accept="image/*" capture="environment" name="foto2" /></label>
+          <input name="desc2" placeholder="Descripción foto 2" />
+          <label>Foto 3<input type="file" accept="image/*" capture="environment" name="foto3" /></label>
+          <input name="desc3" placeholder="Descripción foto 3" />
+          <label>Foto 4<input type="file" accept="image/*" capture="environment" name="foto4" /></label>
+          <input name="desc4" placeholder="Descripción foto 4" />
+        </div>
+
+        <h3>Firma del Funcionario</h3>
+        <canvas id="firmaCanvas" width="300" height="150"></canvas>
+        <button type="button" id="limpiarFirma">Limpiar Firma</button>
+
+        <label>Nombre*<input required name="firma_nombre" /></label>
+        <label>Fecha Elaboración Informe*<input type="date" required name="firma_fecha" /></label>
+
+        <button type="submit">Siguiente</button>
+      </form>
+
+      <form id="form2" style="display:none">
+        <h2>Hoja 2: Actividad Técnica</h2>
+        <label>Regional*<input required name="regional" /></label>
+        <label>Tipo de Estación*<select required name="tipo_estacion">
+          <option></option><option>TORRE CUADRADA</option><option>TORRE TRIANGULAR</option>
+          <option>MONOPOLO</option><option>TERRAZA</option><option>POSTE</option>
+          <option>INDOOR</option><option>VALLA</option>
+        </select></label>
+        <label>Fecha Ejecución*<input type="date" required name="fecha2" /></label>
+        <label>Tipo de Sitio*<select required name="tipo_sitio">
+          <option></option><option>PROPIO</option><option>ARRENDADO</option>
+        </select></label>
+        <label>Fecha Fin Actividad*<input type="date" required name="fecha_fin" /></label>
+        <label>Técnico*<input required name="tecnico" /></label>
+        <label>¿Implica Exclusión?*<select required name="exclusion">
+          <option></option><option>SI</option><option>NO</option>
+        </select></label>
+        <label>Tipo de Actividad*<select required name="actividad">
+          <option></option><option>EMERGENCIA</option><option>CORRECTIVO</option>
+        </select></label>
+        <label>Tipo de equipo en falla*<select required name="equipo">
+          <option></option><option>TX</option><option>ENERGÍA</option><option>HARDWARE</option>
+          <option>SOFTWARE</option><option>HURTO</option><option>CLIMATICOS</option>
+        </select></label>
+        <label>Marca<input name="marca" /></label>
+        <label>Modelo<input name="modelo" /></label>
+        <label>¿Afecta Servicios?*<select required name="afecta">
+          <option></option><option>SI</option><option>NO</option>
+        </select></label>
+        <label>Cambio*<select required name="cambio">
+          <option></option><option>SI</option><option>NO</option>
+        </select></label>
+        <label>Instalación*<select required name="instalacion">
+          <option></option><option>SI</option><option>NO</option>
+        </select></label>
+        <label>Descripción Falla<textarea name="desc_falla"></textarea></label>
+        <label>Descripción Solución<textarea name="desc_solucion"></textarea></label>
+
+        <h3>Repuestos (máx 4)</h3>
+        <div id="repuestos"></div>
+        <button type="button" id="agregarRepuesto">+ Agregar repuesto</button>
+
+        <h3>Evidencias técnicas</h3>
+        <label>CMTS en corto<input type="file" accept="image/*" name="cmts_corto" /></label>
+        <label>Retiro CMTS<input type="file" accept="image/*" name="retiro" /></label>
+        <label>Instalación nuevo CMTS<input type="file" accept="image/*" name="nuevo_cmts" /></label>
+        <label>CMTS en producción<input type="file" accept="image/*" name="cmts_prod" /></label>
+        <label>Evidencia Adicional 1<input type="file" accept="image/*" name="extra1" /></label>
+        <input name="desc_extra1" placeholder="Descripción adicional 1" />
+        <label>Evidencia Adicional 2<input type="file" accept="image/*" name="extra2" /></label>
+        <input name="desc_extra2" placeholder="Descripción adicional 2" />
+
+        <label>¿Falla resuelta?*<select required name="resuelta">
+          <option></option><option>SI</option><option>NO</option>
+        </select></label>
+
+        <label>Observaciones<textarea name="obs_final"></textarea></label>
+
+        <button type="button" id="volver1">← Volver</button>
+        <button type="submit">Generar PDF</button>
+      </form>
     </section>
 
     <section id="preview" style="display:none">
-      <h2>Vista Previa del PDF</h2>
+      <h2>Vista previa del PDF</h2>
       <iframe id="pdfPreview" style="width:100%; height:80vh;"></iframe>
       <button id="editarBtn">Editar</button>
       <button id="descargarBtn">Descargar PDF</button>
