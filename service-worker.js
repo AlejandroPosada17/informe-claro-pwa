@@ -1,4 +1,4 @@
-const CACHE_NAME = 'claro-informe-cache-v1';
+const CACHE_NAME = 'claro-informe-cache-v2';
 const urlsToCache = [
   '/',
   '/index.html',
