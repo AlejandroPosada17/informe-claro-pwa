@@ -1,1 +1,1 @@
-// app.js será aquí insertado
+console.log('✅ La aplicación se ha cargado correctamente.');
