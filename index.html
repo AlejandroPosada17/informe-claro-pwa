@@ -3,15 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Informe Claro</title>
+  <title>Informe Técnico Claro</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Informe Claro</h1>
-  <p>✅ Aplicación funcionando correctamente.</p>
-  <p>Este es el punto de partida para tu PWA. El siguiente paso será integrar los formularios.</p>
+  <header>
+    <h1>Informe Técnico - Claro</h1>
+  </header>
 
+  <main>
+    <section id="formulario" class="pantalla-activa">
+      <!-- Las secciones del formulario se cargan dinámicamente aquí desde JS -->
+    </section>
+
+    <section id="preview" style="display:none">
+      <h2>Vista Previa del PDF</h2>
+      <iframe id="pdfPreview" style="width:100%; height:80vh;"></iframe>
+      <button id="editarBtn">Editar</button>
+      <button id="descargarBtn">Descargar PDF</button>
+    </section>
+  </main>
+
+  <script src="libs/html2canvas.min.js"></script>
+  <script src="libs/jspdf.umd.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
