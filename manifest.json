@@ -1,9 +1,16 @@
 {
   "name": "Informe Técnico Claro",
-  "short_name": "InformeClaro",
-  "start_url": "./index.html",
+  "short_name": "Informe Claro",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#e60000",
-  "icons": []
+  "theme_color": "#e30613",
+  "icons": [
+    {
+      "src": "logo-claro.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "lang": "es"
 }
