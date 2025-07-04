@@ -1,1 +1,10 @@
-/* style.css será aquí insertado */
+body {
+  font-family: sans-serif;
+  padding: 20px;
+  background: #f9f9f9;
+  color: #333;
+}
+
+h1 {
+  color: #e60000;
+}
