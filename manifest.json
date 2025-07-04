@@ -1,1 +1,9 @@
-{ "name": "Informe Claro", "short_name": "InformeClaro" }
+{
+  "name": "Informe Claro",
+  "short_name": "InformeClaro",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#e60000",
+  "icons": []
+}
