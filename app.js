@@ -1,9 +1,9 @@
 // --- Variables globales ---
 let datosHoja1 = JSON.parse(localStorage.getItem('datosHoja1') || '{}');
 let datosHoja2 = JSON.parse(localStorage.getItem('datosHoja2') || '{}');
-let evidencias1 = datosHoja1.evidencias || [null, null, null, null];
-let evidencias2 = datosHoja2.evidencias || [null, null, null, null, null, null];
-let firmas = [datosHoja1.firma || null];
+let evidencias1 = [null, null, null, null];
+let evidencias2 = [null, null, null, null, null, null];
+let firmas = [null];
 
 // --- Utilidades ---
 function toBase64(file, cb) {
@@ -12,8 +12,14 @@ function toBase64(file, cb) {
   reader.readAsDataURL(file);
 }
 function guardarLocal() {
-  localStorage.setItem('datosHoja1', JSON.stringify(datosHoja1));
-  localStorage.setItem('datosHoja2', JSON.stringify(datosHoja2));
+  // Guardar solo los datos de texto, sin imágenes
+  let d1 = {...datosHoja1};
+  let d2 = {...datosHoja2};
+  delete d1.evidencias;
+  delete d1.firma;
+  delete d2.evidencias;
+  localStorage.setItem('datosHoja1', JSON.stringify(d1));
+  localStorage.setItem('datosHoja2', JSON.stringify(d2));
 }
 function validarHoja1(datos) {
   if (!datos) return false;
@@ -38,6 +44,89 @@ function validarHoja2(datos) {
   ];
   for (let k of requeridos) if (!datos[k]) return false;
   return true;
+}
+
+// --- Cámara emergente ---
+function abrirCamara(callback) {
+  let facingMode = "environment";
+  let stream = null;
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed';
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = '100vw';
+  overlay.style.height = '100vh';
+  overlay.style.background = 'rgba(0,0,0,0.8)';
+  overlay.style.zIndex = 9999;
+  overlay.style.display = 'flex';
+  overlay.style.flexDirection = 'column';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+
+  const video = document.createElement('video');
+  video.style.width = '90vw';
+  video.style.maxWidth = '400px';
+  video.style.borderRadius = '8px';
+  video.autoplay = true;
+
+  const btns = document.createElement('div');
+  btns.style.display = 'flex';
+  btns.style.gap = '8px';
+  btns.style.marginTop = '8px';
+
+  const btnFlip = document.createElement('button');
+  btnFlip.textContent = 'Cambiar cámara';
+  btnFlip.type = 'button';
+
+  const btnCapture = document.createElement('button');
+  btnCapture.textContent = 'Capturar';
+  btnCapture.type = 'button';
+
+  const btnCancel = document.createElement('button');
+  btnCancel.textContent = 'Cancelar';
+  btnCancel.type = 'button';
+
+  btns.appendChild(btnFlip);
+  btns.appendChild(btnCapture);
+  btns.appendChild(btnCancel);
+
+  overlay.appendChild(video);
+  overlay.appendChild(btns);
+  document.body.appendChild(overlay);
+
+  function startStream() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode } }).then(s => {
+      stream = s;
+      video.srcObject = stream;
+      video.play();
+    }).catch(() => {
+      alert('No se pudo acceder a la cámara.');
+      document.body.removeChild(overlay);
+    });
+  }
+  startStream();
+
+  btnFlip.onclick = () => {
+    facingMode = (facingMode === "environment") ? "user" : "environment";
+    startStream();
+  };
+  btnCapture.onclick = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    const b64 = canvas.toDataURL('image/jpeg');
+    if (stream) stream.getTracks().forEach(track => track.stop());
+    document.body.removeChild(overlay);
+    callback(b64);
+  };
+  btnCancel.onclick = () => {
+    if (stream) stream.getTracks().forEach(track => track.stop());
+    document.body.removeChild(overlay);
+  };
 }
 
 // --- Renderiza la pantalla inicial ---
@@ -131,9 +220,10 @@ function renderHoja1() {
   for (let i = 0; i < 4; i++) {
     evHtml += `
       <label>Evidencia ${i+1}</label>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="file" accept="image/*" id="foto1_${i}" style="flex:1;" />
+      <div class="evidencia-btns">
         <button type="button" id="camara1_${i}">Cámara</button>
+        <button type="button" id="galeria1_${i}">Galería</button>
+        <input type="file" accept="image/*" id="file1_${i}" />
       </div>
       <img id="prev1_${i}" class="preview" style="display:${evidencias1[i]?'block':'none'}" src="${evidencias1[i]||''}"/>
       <input id="desc1_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja1.evidencias?.[i]?.desc||''}" />
@@ -141,67 +231,28 @@ function renderHoja1() {
   }
   document.getElementById('evidencias1').innerHTML = evHtml;
   for (let i = 0; i < 4; i++) {
-    document.getElementById(`foto1_${i}`).onchange = e => {
+    // Galería
+    document.getElementById(`galeria1_${i}`).onclick = () => {
+      document.getElementById(`file1_${i}`).click();
+    };
+    document.getElementById(`file1_${i}`).onchange = e => {
       if (e.target.files[0]) {
         toBase64(e.target.files[0], b64 => {
           evidencias1[i] = b64;
           document.getElementById(`prev1_${i}`).src = b64;
           document.getElementById(`prev1_${i}`).style.display = 'block';
-          datosHoja1.evidencias = evidencias1.map((img, idx) => ({img, desc: document.getElementById(`desc1_${idx}`).value}));
-          guardarLocal();
         });
       }
     };
-    document.getElementById(`desc1_${i}`).oninput = () => {
-      datosHoja1.evidencias = evidencias1.map((img, idx) => ({img, desc: document.getElementById(`desc1_${idx}`).value}));
-      guardarLocal();
-    };
+    // Cámara
     document.getElementById(`camara1_${i}`).onclick = () => {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const video = document.createElement('video');
-        video.style.width = '100%';
-        video.style.maxWidth = '300px';
-        video.autoplay = true;
-        const captureBtn = document.createElement('button');
-        captureBtn.textContent = 'Capturar';
-        captureBtn.type = 'button';
-        const closeBtn = document.createElement('button');
-        closeBtn.textContent = 'Cerrar';
-        closeBtn.type = 'button';
-        closeBtn.style.marginLeft = '8px';
-        const container = document.createElement('div');
-        container.appendChild(video);
-        container.appendChild(captureBtn);
-        container.appendChild(closeBtn);
-        document.body.appendChild(container);
-        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-          video.srcObject = stream;
-          captureBtn.onclick = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            const b64 = canvas.toDataURL('image/jpeg');
-            evidencias1[i] = b64;
-            document.getElementById(`prev1_${i}`).src = b64;
-            document.getElementById(`prev1_${i}`).style.display = 'block';
-            datosHoja1.evidencias = evidencias1.map((img, idx) => ({img, desc: document.getElementById(`desc1_${idx}`).value}));
-            guardarLocal();
-            stream.getTracks().forEach(track => track.stop());
-            document.body.removeChild(container);
-          };
-          closeBtn.onclick = () => {
-            stream.getTracks().forEach(track => track.stop());
-            document.body.removeChild(container);
-          };
-        }).catch(() => {
-          alert('No se pudo acceder a la cámara.');
-          document.body.removeChild(container);
-        });
-      } else {
-        alert('La cámara no está soportada en este dispositivo/navegador.');
-      }
+      abrirCamara((b64) => {
+        evidencias1[i] = b64;
+        document.getElementById(`prev1_${i}`).src = b64;
+        document.getElementById(`prev1_${i}`).style.display = 'block';
+      });
     };
+    document.getElementById(`desc1_${i}`).oninput = guardarLocal;
   }
 
   // Firma
@@ -261,8 +312,6 @@ function renderHoja1() {
           descripcion: fd.get(`descItem${i}`)
         });
       }
-      datosHoja1.evidencias = evidencias1.map((img, idx) => ({img, desc: document.getElementById(`desc1_${idx}`).value}));
-      datosHoja1.firma = firmas[0];
       guardarLocal();
     };
   });
@@ -279,8 +328,6 @@ function renderHoja1() {
         descripcion: fd.get(`descItem${i}`)
       });
     }
-    datosHoja1.evidencias = evidencias1.map((img, idx) => ({img, desc: document.getElementById(`desc1_${idx}`).value}));
-    datosHoja1.firma = firmas[0];
     guardarLocal();
     if (validarHoja1(datosHoja1)) {
       renderHoja2();
@@ -426,9 +473,10 @@ function renderHoja2() {
   for (let i = 0; i < 6; i++) {
     evHtml += `
       <label>Evidencia ${i+1}</label>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="file" accept="image/*" id="foto2_${i}" style="flex:1;" />
+      <div class="evidencia-btns">
         <button type="button" id="camara2_${i}">Cámara</button>
+        <button type="button" id="galeria2_${i}">Galería</button>
+        <input type="file" accept="image/*" id="file2_${i}" />
       </div>
       <img id="prev2_${i}" class="preview" style="display:${evidencias2[i]?'block':'none'}" src="${evidencias2[i]||''}"/>
       <input id="desc2_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja2.evidencias?.[i]?.desc||''}" />
@@ -436,67 +484,28 @@ function renderHoja2() {
   }
   document.getElementById('evidencias2').innerHTML = evHtml;
   for (let i = 0; i < 6; i++) {
-    document.getElementById(`foto2_${i}`).onchange = e => {
+    // Galería
+    document.getElementById(`galeria2_${i}`).onclick = () => {
+      document.getElementById(`file2_${i}`).click();
+    };
+    document.getElementById(`file2_${i}`).onchange = e => {
       if (e.target.files[0]) {
         toBase64(e.target.files[0], b64 => {
           evidencias2[i] = b64;
           document.getElementById(`prev2_${i}`).src = b64;
           document.getElementById(`prev2_${i}`).style.display = 'block';
-          datosHoja2.evidencias = evidencias2.map((img, idx) => ({img, desc: document.getElementById(`desc2_${idx}`).value}));
-          guardarLocal();
         });
       }
     };
-    document.getElementById(`desc2_${i}`).oninput = () => {
-      datosHoja2.evidencias = evidencias2.map((img, idx) => ({img, desc: document.getElementById(`desc2_${idx}`).value}));
-      guardarLocal();
-    };
+    // Cámara
     document.getElementById(`camara2_${i}`).onclick = () => {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const video = document.createElement('video');
-        video.style.width = '100%';
-        video.style.maxWidth = '300px';
-        video.autoplay = true;
-        const captureBtn = document.createElement('button');
-        captureBtn.textContent = 'Capturar';
-        captureBtn.type = 'button';
-        const closeBtn = document.createElement('button');
-        closeBtn.textContent = 'Cerrar';
-        closeBtn.type = 'button';
-        closeBtn.style.marginLeft = '8px';
-        const container = document.createElement('div');
-        container.appendChild(video);
-        container.appendChild(captureBtn);
-        container.appendChild(closeBtn);
-        document.body.appendChild(container);
-        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-          video.srcObject = stream;
-          captureBtn.onclick = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            const b64 = canvas.toDataURL('image/jpeg');
-            evidencias2[i] = b64;
-            document.getElementById(`prev2_${i}`).src = b64;
-            document.getElementById(`prev2_${i}`).style.display = 'block';
-            datosHoja2.evidencias = evidencias2.map((img, idx) => ({img, desc: document.getElementById(`desc2_${idx}`).value}));
-            guardarLocal();
-            stream.getTracks().forEach(track => track.stop());
-            document.body.removeChild(container);
-          };
-          closeBtn.onclick = () => {
-            stream.getTracks().forEach(track => track.stop());
-            document.body.removeChild(container);
-          };
-        }).catch(() => {
-          alert('No se pudo acceder a la cámara.');
-          document.body.removeChild(container);
-        });
-      } else {
-        alert('La cámara no está soportada en este dispositivo/navegador.');
-      }
+      abrirCamara((b64) => {
+        evidencias2[i] = b64;
+        document.getElementById(`prev2_${i}`).src = b64;
+        document.getElementById(`prev2_${i}`).style.display = 'block';
+      });
     };
+    document.getElementById(`desc2_${i}`).oninput = guardarLocal;
   }
 
   // Guardado en cada cambio
@@ -505,7 +514,6 @@ function renderHoja2() {
       const fd = new FormData(document.getElementById('form2'));
       datosHoja2 = Object.fromEntries(fd.entries());
       datosHoja2.repuestos = repuestos;
-      datosHoja2.evidencias = evidencias2.map((img, idx) => ({img, desc: document.getElementById(`desc2_${idx}`).value}));
       guardarLocal();
     };
   });
@@ -516,7 +524,6 @@ function renderHoja2() {
     const fd = new FormData(e.target);
     datosHoja2 = Object.fromEntries(fd.entries());
     datosHoja2.repuestos = repuestos;
-    datosHoja2.evidencias = evidencias2.map((img, idx) => ({img, desc: document.getElementById(`desc2_${idx}`).value}));
     guardarLocal();
     if (validarHoja2(datosHoja2)) {
       renderPrevisualizacion();
@@ -526,6 +533,9 @@ function renderHoja2() {
   };
   document.getElementById('volver1').onclick = renderHoja1;
 }
+
+// ... El resto del código (previsualización, generación de PDF, etc.) permanece igual ...
+// Si necesitas el archivo completo con todas las funciones, avísame y te lo entrego íntegro.
 
 function renderPrevisualizacion() {
   document.getElementById('app').innerHTML = `
