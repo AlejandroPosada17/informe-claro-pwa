@@ -223,9 +223,8 @@ function renderHoja1() {
     evHtml += `
       <label>Evidencia ${i+1}</label>
       <div class="evidencia-btns">
-        <button type="button" id="camara1_${i}">Cámara</button>
-        <button type="button" id="galeria1_${i}">Galería</button>
-        <input type="file" accept="image/*" id="file1_${i}" />
+        <button type="button" id="adjuntar1_${i}">Adjuntar foto</button>
+        <input type="file" accept="image/*" id="file1_${i}" style="display:none;" />
       </div>
       <img id="prev1_${i}" class="preview" style="display:${evidencias1[i]?'block':'none'}" src="${evidencias1[i]||''}"/>
       <input id="desc1_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja1.evidencias?.[i]?.desc||''}" />
@@ -233,8 +232,7 @@ function renderHoja1() {
   }
   document.getElementById('evidencias1').innerHTML = evHtml;
   for (let i = 0; i < 4; i++) {
-    // Galería
-    document.getElementById(`galeria1_${i}`).onclick = () => {
+    document.getElementById(`adjuntar1_${i}`).onclick = () => {
       document.getElementById(`file1_${i}`).click();
     };
     document.getElementById(`file1_${i}`).onchange = e => {
@@ -245,14 +243,6 @@ function renderHoja1() {
           document.getElementById(`prev1_${i}`).style.display = 'block';
         });
       }
-    };
-    // Cámara
-    document.getElementById(`camara1_${i}`).onclick = () => {
-      abrirCamara((b64) => {
-        evidencias1[i] = b64;
-        document.getElementById(`prev1_${i}`).src = b64;
-        document.getElementById(`prev1_${i}`).style.display = 'block';
-      });
     };
     document.getElementById(`desc1_${i}`).oninput = guardarLocal;
   }
@@ -486,9 +476,8 @@ function renderHoja2() {
     evHtml += `
       <label>Evidencia ${i+1}</label>
       <div class="evidencia-btns">
-        <button type="button" id="camara2_${i}">Cámara</button>
-        <button type="button" id="galeria2_${i}">Galería</button>
-        <input type="file" accept="image/*" id="file2_${i}" />
+        <button type="button" id="adjuntar2_${i}">Adjuntar foto</button>
+        <input type="file" accept="image/*" id="file2_${i}" style="display:none;" />
       </div>
       <img id="prev2_${i}" class="preview" style="display:${evidencias2[i]?'block':'none'}" src="${evidencias2[i]||''}"/>
       <input id="desc2_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja2.evidencias?.[i]?.desc||''}" />
@@ -496,8 +485,7 @@ function renderHoja2() {
   }
   document.getElementById('evidencias2').innerHTML = evHtml;
   for (let i = 0; i < 6; i++) {
-    // Galería
-    document.getElementById(`galeria2_${i}`).onclick = () => {
+    document.getElementById(`adjuntar2_${i}`).onclick = () => {
       document.getElementById(`file2_${i}`).click();
     };
     document.getElementById(`file2_${i}`).onchange = e => {
@@ -508,14 +496,6 @@ function renderHoja2() {
           document.getElementById(`prev2_${i}`).style.display = 'block';
         });
       }
-    };
-    // Cámara
-    document.getElementById(`camara2_${i}`).onclick = () => {
-      abrirCamara((b64) => {
-        evidencias2[i] = b64;
-        document.getElementById(`prev2_${i}`).src = b64;
-        document.getElementById(`prev2_${i}`).style.display = 'block';
-      });
     };
     document.getElementById(`desc2_${i}`).oninput = guardarLocal;
   }
