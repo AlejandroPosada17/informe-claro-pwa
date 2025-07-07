@@ -15,6 +15,30 @@ function guardarLocal() {
   localStorage.setItem('datosHoja1', JSON.stringify(datosHoja1));
   localStorage.setItem('datosHoja2', JSON.stringify(datosHoja2));
 }
+function validarHoja1(datos) {
+  if (!datos) return false;
+  const requeridos = [
+    'nombreEstacion', 'categoria', 'zona', 'responsable', 'departamento',
+    'fechaEjecucion', 'direccion', 'nombreFuncionario', 'fechaElaboracion'
+  ];
+  for (let k of requeridos) if (!datos[k]) return false;
+  if (!Array.isArray(datos.items) || datos.items.length !== 13) return false;
+  for (let i = 0; i < 13; i++) {
+    if (!datos.items[i] || !datos.items[i].respuesta) return false;
+  }
+  if (!datos.firma) return false;
+  return true;
+}
+function validarHoja2(datos) {
+  if (!datos) return false;
+  const requeridos = [
+    'regional', 'tipoEstacion', 'fechaEjecucion', 'tipoSitio', 'fechaFinActividad',
+    'tecnico', 'exclusion', 'tipoActividad', 'tipoEquipoFalla',
+    'afectacionServicios', 'cambio', 'instalacion', 'fallaResuelta'
+  ];
+  for (let k of requeridos) if (!datos[k]) return false;
+  return true;
+}
 
 // --- Renderiza la pantalla inicial ---
 function renderHoja1() {
@@ -107,7 +131,10 @@ function renderHoja1() {
   for (let i = 0; i < 4; i++) {
     evHtml += `
       <label>Evidencia ${i+1}</label>
-      <input type="file" accept="image/*" id="foto1_${i}" />
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="file" accept="image/*" id="foto1_${i}" style="flex:1;" />
+        <button type="button" id="camara1_${i}">Cámara</button>
+      </div>
       <img id="prev1_${i}" class="preview" style="display:${evidencias1[i]?'block':'none'}" src="${evidencias1[i]||''}"/>
       <input id="desc1_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja1.evidencias?.[i]?.desc||''}" />
     `;
@@ -128,6 +155,52 @@ function renderHoja1() {
     document.getElementById(`desc1_${i}`).oninput = () => {
       datosHoja1.evidencias = evidencias1.map((img, idx) => ({img, desc: document.getElementById(`desc1_${idx}`).value}));
       guardarLocal();
+    };
+    document.getElementById(`camara1_${i}`).onclick = () => {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const video = document.createElement('video');
+        video.style.width = '100%';
+        video.style.maxWidth = '300px';
+        video.autoplay = true;
+        const captureBtn = document.createElement('button');
+        captureBtn.textContent = 'Capturar';
+        captureBtn.type = 'button';
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Cerrar';
+        closeBtn.type = 'button';
+        closeBtn.style.marginLeft = '8px';
+        const container = document.createElement('div');
+        container.appendChild(video);
+        container.appendChild(captureBtn);
+        container.appendChild(closeBtn);
+        document.body.appendChild(container);
+        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+          video.srcObject = stream;
+          captureBtn.onclick = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const b64 = canvas.toDataURL('image/jpeg');
+            evidencias1[i] = b64;
+            document.getElementById(`prev1_${i}`).src = b64;
+            document.getElementById(`prev1_${i}`).style.display = 'block';
+            datosHoja1.evidencias = evidencias1.map((img, idx) => ({img, desc: document.getElementById(`desc1_${idx}`).value}));
+            guardarLocal();
+            stream.getTracks().forEach(track => track.stop());
+            document.body.removeChild(container);
+          };
+          closeBtn.onclick = () => {
+            stream.getTracks().forEach(track => track.stop());
+            document.body.removeChild(container);
+          };
+        }).catch(() => {
+          alert('No se pudo acceder a la cámara.');
+          document.body.removeChild(container);
+        });
+      } else {
+        alert('La cámara no está soportada en este dispositivo/navegador.');
+      }
     };
   }
 
@@ -209,7 +282,11 @@ function renderHoja1() {
     datosHoja1.evidencias = evidencias1.map((img, idx) => ({img, desc: document.getElementById(`desc1_${idx}`).value}));
     datosHoja1.firma = firmas[0];
     guardarLocal();
-    renderHoja2();
+    if (validarHoja1(datosHoja1)) {
+      renderHoja2();
+    } else {
+      alert('Por favor, completa todos los campos requeridos.');
+    }
   };
 }
 
@@ -334,7 +411,6 @@ function renderHoja2() {
       </tr>`;
     }
     document.getElementById('tabla-repuestos').innerHTML = html;
-    // Hack para vincular inputs a repuestos
     Array.from(document.querySelectorAll('#tabla-repuestos tr')).forEach((tr, i) => tr.repuesto = repuestos[i]);
   }
   document.getElementById('agregarRepuesto').onclick = () => {
@@ -350,7 +426,10 @@ function renderHoja2() {
   for (let i = 0; i < 6; i++) {
     evHtml += `
       <label>Evidencia ${i+1}</label>
-      <input type="file" accept="image/*" id="foto2_${i}" />
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="file" accept="image/*" id="foto2_${i}" style="flex:1;" />
+        <button type="button" id="camara2_${i}">Cámara</button>
+      </div>
       <img id="prev2_${i}" class="preview" style="display:${evidencias2[i]?'block':'none'}" src="${evidencias2[i]||''}"/>
       <input id="desc2_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja2.evidencias?.[i]?.desc||''}" />
     `;
@@ -371,6 +450,52 @@ function renderHoja2() {
     document.getElementById(`desc2_${i}`).oninput = () => {
       datosHoja2.evidencias = evidencias2.map((img, idx) => ({img, desc: document.getElementById(`desc2_${idx}`).value}));
       guardarLocal();
+    };
+    document.getElementById(`camara2_${i}`).onclick = () => {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const video = document.createElement('video');
+        video.style.width = '100%';
+        video.style.maxWidth = '300px';
+        video.autoplay = true;
+        const captureBtn = document.createElement('button');
+        captureBtn.textContent = 'Capturar';
+        captureBtn.type = 'button';
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Cerrar';
+        closeBtn.type = 'button';
+        closeBtn.style.marginLeft = '8px';
+        const container = document.createElement('div');
+        container.appendChild(video);
+        container.appendChild(captureBtn);
+        container.appendChild(closeBtn);
+        document.body.appendChild(container);
+        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+          video.srcObject = stream;
+          captureBtn.onclick = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const b64 = canvas.toDataURL('image/jpeg');
+            evidencias2[i] = b64;
+            document.getElementById(`prev2_${i}`).src = b64;
+            document.getElementById(`prev2_${i}`).style.display = 'block';
+            datosHoja2.evidencias = evidencias2.map((img, idx) => ({img, desc: document.getElementById(`desc2_${idx}`).value}));
+            guardarLocal();
+            stream.getTracks().forEach(track => track.stop());
+            document.body.removeChild(container);
+          };
+          closeBtn.onclick = () => {
+            stream.getTracks().forEach(track => track.stop());
+            document.body.removeChild(container);
+          };
+        }).catch(() => {
+          alert('No se pudo acceder a la cámara.');
+          document.body.removeChild(container);
+        });
+      } else {
+        alert('La cámara no está soportada en este dispositivo/navegador.');
+      }
     };
   }
 
@@ -393,7 +518,11 @@ function renderHoja2() {
     datosHoja2.repuestos = repuestos;
     datosHoja2.evidencias = evidencias2.map((img, idx) => ({img, desc: document.getElementById(`desc2_${idx}`).value}));
     guardarLocal();
-    renderPrevisualizacion();
+    if (validarHoja2(datosHoja2)) {
+      renderPrevisualizacion();
+    } else {
+      alert('Por favor, completa todos los campos requeridos.');
+    }
   };
   document.getElementById('volver1').onclick = renderHoja1;
 }
@@ -401,33 +530,51 @@ function renderHoja2() {
 function renderPrevisualizacion() {
   document.getElementById('app').innerHTML = `
     <h2>Previsualización del informe</h2>
+    <div class="paginador">
+      <button id="btnPag1" class="active">Página 1</button>
+      <button id="btnPag2">Página 2</button>
+    </div>
     <div class="previsualizacion-pdf" id="previsualizacion-pdf">
       <div id="html-pagina1"></div>
-      <div id="html-pagina2"></div>
+      <div id="html-pagina2" style="display:none"></div>
     </div>
     <button id="descargar">Descargar PDF</button>
     <button id="editar">Editar datos</button>
   `;
 
-  // Renderiza el HTML institucional con los datos
   renderHtmlInstitucional('html-pagina1', datosHoja1, datosHoja2, 1);
   renderHtmlInstitucional('html-pagina2', datosHoja1, datosHoja2, 2);
 
-  // Previsualización como imagen
   setTimeout(() => {
     html2canvas(document.getElementById('html-pagina1'), {backgroundColor: "#fff"}).then(canvas1 => {
       document.getElementById('html-pagina1').innerHTML = '';
+      canvas1.style.width = '100%';
+      canvas1.style.height = 'auto';
       document.getElementById('html-pagina1').appendChild(canvas1);
       html2canvas(document.getElementById('html-pagina2'), {backgroundColor: "#fff"}).then(canvas2 => {
         document.getElementById('html-pagina2').innerHTML = '';
+        canvas2.style.width = '100%';
+        canvas2.style.height = 'auto';
         document.getElementById('html-pagina2').appendChild(canvas2);
       });
     });
   }, 500);
 
+  document.getElementById('btnPag1').onclick = () => {
+    document.getElementById('html-pagina1').style.display = '';
+    document.getElementById('html-pagina2').style.display = 'none';
+    document.getElementById('btnPag1').classList.add('active');
+    document.getElementById('btnPag2').classList.remove('active');
+  };
+  document.getElementById('btnPag2').onclick = () => {
+    document.getElementById('html-pagina1').style.display = 'none';
+    document.getElementById('html-pagina2').style.display = '';
+    document.getElementById('btnPag2').classList.add('active');
+    document.getElementById('btnPag1').classList.remove('active');
+  };
+
   document.getElementById('descargar').onclick = () => {
     generarPDF(datosHoja1, datosHoja2, () => {
-      // Limpia localStorage al descargar
       localStorage.removeItem('datosHoja1');
       localStorage.removeItem('datosHoja2');
       setTimeout(() => {
@@ -445,9 +592,6 @@ function renderPrevisualizacion() {
 
 // --- Renderiza el HTML institucional con los datos ---
 function renderHtmlInstitucional(divId, hoja1, hoja2, pagina) {
-  // Aquí debes adaptar el HTML institucional que me pasaste, usando los datos de hoja1 y hoja2
-  // Por simplicidad, te muestro un ejemplo de cómo hacerlo con los campos principales.
-  // Puedes expandirlo con el resto de los campos y tablas según tu formato.
   let html = '';
   if (pagina === 1) {
     html = `
@@ -566,7 +710,6 @@ function renderHtmlInstitucional(divId, hoja1, hoja2, pagina) {
 function generarPDF(hoja1, hoja2, cb) {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({unit:'pt',format:[700,990]});
-  // Renderiza el HTML institucional en un div oculto
   let div1 = document.createElement('div');
   div1.style.position = 'absolute';
   div1.style.left = '-9999px';
@@ -595,11 +738,13 @@ function generarPDF(hoja1, hoja2, cb) {
   }, 500);
 }
 
-// Inicia la app
-if (!datosHoja1 || Object.keys(datosHoja1).length === 0) {
-  renderHoja1();
-} else if (!datosHoja2 || Object.keys(datosHoja2).length === 0) {
-  renderHoja2();
+// --- Flujo de inicio seguro ---
+if (validarHoja1(datosHoja1)) {
+  if (validarHoja2(datosHoja2)) {
+    renderPrevisualizacion();
+  } else {
+    renderHoja2();
+  }
 } else {
-  renderPrevisualizacion();
+  renderHoja1();
 }
