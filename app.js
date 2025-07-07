@@ -224,7 +224,7 @@ function renderHoja1() {
       <label>Evidencia ${i+1}</label>
       <div class="evidencia-btns">
         <button type="button" id="adjuntar1_${i}">Adjuntar foto</button>
-        <input type="file" accept="image/*" id="file1_${i}" style="display:none;" />
+        <input type="file" accept="image/*" capture="environment" id="file1_${i}" style="display:none;" />
       </div>
       <img id="prev1_${i}" class="preview" style="display:${evidencias1[i]?'block':'none'}" src="${evidencias1[i]||''}"/>
       <input id="desc1_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja1.evidencias?.[i]?.desc||''}" />
@@ -477,7 +477,7 @@ function renderHoja2() {
       <label>Evidencia ${i+1}</label>
       <div class="evidencia-btns">
         <button type="button" id="adjuntar2_${i}">Adjuntar foto</button>
-        <input type="file" accept="image/*" id="file2_${i}" style="display:none;" />
+        <input type="file" accept="image/*" capture="environment" id="file2_${i}" style="display:none;" />
       </div>
       <img id="prev2_${i}" class="preview" style="display:${evidencias2[i]?'block':'none'}" src="${evidencias2[i]||''}"/>
       <input id="desc2_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja2.evidencias?.[i]?.desc||''}" />
@@ -541,9 +541,9 @@ function renderPrevisualizacion() {
       <button id="btnPag1" class="active">Página 1</button>
       <button id="btnPag2">Página 2</button>
     </div>
-    <div class="previsualizacion-pdf" id="previsualizacion-pdf" style="min-height: 1020px;">
-      <div id="canvas-container1" style="display:block;text-align:center;">Cargando página 1...</div>
-      <div id="canvas-container2" style="display:none;text-align:center;">Cargando página 2...</div>
+    <div class="previsualizacion-pdf" id="previsualizacion-pdf">
+      <div id="canvas-container1" style="display:block;text-align:center;"></div>
+      <div id="canvas-container2" style="display:none;text-align:center;"></div>
     </div>
     <button id="descargar">Descargar PDF</button>
     <button id="editar">Editar datos</button>
@@ -564,7 +564,8 @@ function renderPrevisualizacion() {
 
     html2canvas(tempDiv1, {backgroundColor: "#fff", useCORS: true}).then(c1 => {
       let cont1 = document.getElementById('canvas-container1');
-      cont1.innerHTML = '';
+      // Eliminar canvas anterior si existe
+      while (cont1.firstChild) cont1.removeChild(cont1.firstChild);
       c1.style.width = '100%';
       c1.style.height = 'auto';
       cont1.appendChild(c1);
@@ -581,7 +582,8 @@ function renderPrevisualizacion() {
 
     html2canvas(tempDiv2, {backgroundColor: "#fff", useCORS: true}).then(c2 => {
       let cont2 = document.getElementById('canvas-container2');
-      cont2.innerHTML = '';
+      // Eliminar canvas anterior si existe
+      while (cont2.firstChild) cont2.removeChild(cont2.firstChild);
       c2.style.width = '100%';
       c2.style.height = 'auto';
       cont2.appendChild(c2);
