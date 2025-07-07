@@ -224,7 +224,7 @@ function renderHoja1() {
       <label>Evidencia ${i+1}</label>
       <div class="evidencia-btns">
         <button type="button" id="adjuntar1_${i}">Adjuntar foto</button>
-        <input type="file" accept="image/*" capture="environment" id="file1_${i}" style="display:none;" />
+        <input type="file" accept="image/*" id="file1_${i}" style="display:none;" />
       </div>
       <img id="prev1_${i}" class="preview" style="display:${evidencias1[i]?'block':'none'}" src="${evidencias1[i]||''}"/>
       <input id="desc1_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja1.evidencias?.[i]?.desc||''}" />
@@ -477,7 +477,7 @@ function renderHoja2() {
       <label>Evidencia ${i+1}</label>
       <div class="evidencia-btns">
         <button type="button" id="adjuntar2_${i}">Adjuntar foto</button>
-        <input type="file" accept="image/*" capture="environment" id="file2_${i}" style="display:none;" />
+        <input type="file" accept="image/*" id="file2_${i}" style="display:none;" />
       </div>
       <img id="prev2_${i}" class="preview" style="display:${evidencias2[i]?'block':'none'}" src="${evidencias2[i]||''}"/>
       <input id="desc2_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja2.evidencias?.[i]?.desc||''}" />
@@ -566,8 +566,11 @@ function renderPrevisualizacion() {
       let cont1 = document.getElementById('canvas-container1');
       // Eliminar canvas anterior si existe
       while (cont1.firstChild) cont1.removeChild(cont1.firstChild);
+      // Fijar tamaño antes de insertar
       c1.style.width = '100%';
       c1.style.height = 'auto';
+      c1.width = 700;
+      c1.height = 990;
       cont1.appendChild(c1);
       document.body.removeChild(tempDiv1);
     });
@@ -584,8 +587,11 @@ function renderPrevisualizacion() {
       let cont2 = document.getElementById('canvas-container2');
       // Eliminar canvas anterior si existe
       while (cont2.firstChild) cont2.removeChild(cont2.firstChild);
+      // Fijar tamaño antes de insertar
       c2.style.width = '100%';
       c2.style.height = 'auto';
+      c2.width = 700;
+      c2.height = 990;
       cont2.appendChild(c2);
       document.body.removeChild(tempDiv2);
     });
