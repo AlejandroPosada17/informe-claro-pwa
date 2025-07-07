@@ -27,12 +27,12 @@ function validarHoja1(datos) {
     'nombreEstacion', 'categoria', 'zona', 'responsable', 'departamento',
     'fechaEjecucion', 'direccion', 'nombreFuncionario', 'fechaElaboracion'
   ];
-  for (let k of requeridos) if (!datos[k]) return false;
+  for (let k of requeridos) if (!datos[k] || datos[k].trim() === "") return false;
   if (!Array.isArray(datos.items) || datos.items.length !== 13) return false;
   for (let i = 0; i < 13; i++) {
-    if (!datos.items[i] || !datos.items[i].respuesta) return false;
+    if (!datos.items[i] || !datos.items[i].respuesta || datos.items[i].respuesta.trim() === "") return false;
   }
-  if (!datos.firma) return false;
+  if (!firmas[0]) return false;
   return true;
 }
 function validarHoja2(datos) {
@@ -42,7 +42,7 @@ function validarHoja2(datos) {
     'tecnico', 'exclusion', 'tipoActividad', 'tipoEquipoFalla',
     'afectacionServicios', 'cambio', 'instalacion', 'fallaResuelta'
   ];
-  for (let k of requeridos) if (!datos[k]) return false;
+  for (let k of requeridos) if (!datos[k] || datos[k].trim() === "") return false;
   return true;
 }
 
@@ -534,9 +534,6 @@ function renderHoja2() {
   document.getElementById('volver1').onclick = renderHoja1;
 }
 
-// ... El resto del código (previsualización, generación de PDF, etc.) permanece igual ...
-// Si necesitas el archivo completo con todas las funciones, avísame y te lo entrego íntegro.
-
 function renderPrevisualizacion() {
   document.getElementById('app').innerHTML = `
     <h2>Previsualización del informe</h2>
@@ -641,11 +638,11 @@ function renderHtmlInstitucional(divId, hoja1, hoja2, pagina) {
         <div style="margin-top:8px;"><b>Observaciones generales:</b> ${hoja1.observaciones||''}</div>
         <div style="margin-top:16px;font-weight:bold;color:#e30613;">EVIDENCIA FOTOGRÁFICA</div>
         <div style="display:flex;gap:8px;">
-          ${hoja1.evidencias?.map(ev=>ev.img?`<div><img src="${ev.img}" style="width:120px;height:80px;object-fit:cover;"><div style="font-size:10px;">${ev.desc||''}</div></div>`:'').join('')}
+          ${evidencias1.map(ev=>ev?`<div><img src="${ev}" style="width:120px;height:80px;object-fit:cover;"></div>`:'').join('')}
         </div>
         <div style="margin-top:16px;">
           <b>Firma funcionario:</b><br>
-          ${hoja1.firma?`<img src="${hoja1.firma}" style="width:120px;height:40px;">`:''}
+          ${firmas[0]?`<img src="${firmas[0]}" style="width:120px;height:40px;">`:''}
         </div>
         <div><b>Nombre:</b> ${hoja1.nombreFuncionario||''}</div>
         <div><b>Fecha elaboración informe:</b> ${hoja1.fechaElaboracion||''}</div>
@@ -705,7 +702,7 @@ function renderHtmlInstitucional(divId, hoja1, hoja2, pagina) {
         </table>
         <div style="margin-top:16px;font-weight:bold;color:#e30613;">EVIDENCIA FOTOGRÁFICA DE LA ACTIVIDAD</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          ${(hoja2.evidencias||[]).map(ev=>ev.img?`<div><img src="${ev.img}" style="width:120px;height:80px;object-fit:cover;"><div style="font-size:10px;">${ev.desc||''}</div></div>`:'').join('')}
+          ${evidencias2.map(ev=>ev?`<div><img src="${ev}" style="width:120px;height:80px;object-fit:cover;"></div>`:'').join('')}
         </div>
         <div style="margin-top:8px;"><b>¿Falla resuelta?:</b> ${hoja2.fallaResuelta||''}</div>
         <div><b>Observaciones de la actividad:</b> ${hoja2.observacionesActividad||''}</div>
