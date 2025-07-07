@@ -82,10 +82,34 @@ hr {
 .previsualizacion-pdf img {
   border: 1px solid #e30613;
   border-radius: 8px;
-  max-width: 100%;
+  max-width: 100vw;
+  width: 100%;
+  height: auto;
   background: #fff;
+  display: block;
+}
+.paginador {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.paginador button {
+  background: #e30613;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 0;
+}
+.paginador button.active {
+  background: #fff;
+  color: #e30613;
+  border: 1px solid #e30613;
 }
 @media (max-width: 600px) {
   #app { padding: 2px; }
   form { padding: 4px; }
+  .previsualizacion-pdf img { max-width: 100vw; }
 }
