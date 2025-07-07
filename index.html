@@ -3,21 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Informe Técnico Claro</title>
+  <title>Informe Técnico Claro PWA</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="logo-claro.png">
-  <meta name="theme-color" content="#e30613">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app"></div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <div id="app">
+    <div id="formulario"></div>
+    <div id="previsualizacion" style="display:none;">
+      <div class="preview-controls">
+        <button id="btn-pag1" class="preview-btn">Página 1</button>
+        <button id="btn-pag2" class="preview-btn">Página 2</button>
+      </div>
+      <img id="preview-img" class="preview-img" alt="Previsualización PDF" />
+      <div style="text-align:center;margin-top:10px;">
+        <button id="btn-editar">Editar datos</button>
+        <button id="btn-descargar">Descargar PDF</button>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js');
-    }
-  </script>
 </body>
 </html>
