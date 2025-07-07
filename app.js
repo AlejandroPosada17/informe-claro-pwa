@@ -5,6 +5,8 @@ let evidencias1 = [null, null, null, null];
 let evidencias2 = [null, null, null, null, null, null];
 let firmas = [null];
 
+// Eliminamos LOGO_BASE64 y volvemos a usar la ruta del archivo
+
 // --- Utilidades ---
 function toBase64(file, cb) {
   const reader = new FileReader();
@@ -328,6 +330,16 @@ function renderHoja1() {
         descripcion: fd.get(`descItem${i}`)
       });
     }
+    // Guardar evidencias y descripciones en datosHoja1
+    datosHoja1.evidencias = [];
+    for (let i = 0; i < 4; i++) {
+      datosHoja1.evidencias.push({
+        img: evidencias1[i],
+        desc: document.getElementById(`desc1_${i}`).value
+      });
+    }
+    // Guardar firma
+    datosHoja1.firma = firmas[0];
     guardarLocal();
     if (validarHoja1(datosHoja1)) {
       renderHoja2();
@@ -524,6 +536,14 @@ function renderHoja2() {
     const fd = new FormData(e.target);
     datosHoja2 = Object.fromEntries(fd.entries());
     datosHoja2.repuestos = repuestos;
+    // Guardar evidencias y descripciones en datosHoja2
+    datosHoja2.evidencias = [];
+    for (let i = 0; i < 6; i++) {
+      datosHoja2.evidencias.push({
+        img: evidencias2[i],
+        desc: document.getElementById(`desc2_${i}`).value
+      });
+    }
     guardarLocal();
     if (validarHoja2(datosHoja2)) {
       renderPrevisualizacion();
@@ -541,41 +561,64 @@ function renderPrevisualizacion() {
       <button id="btnPag1" class="active">Página 1</button>
       <button id="btnPag2">Página 2</button>
     </div>
-    <div class="previsualizacion-pdf" id="previsualizacion-pdf">
-      <div id="html-pagina1"></div>
-      <div id="html-pagina2" style="display:none"></div>
+    <div class="previsualizacion-pdf" id="previsualizacion-pdf" style="min-height: 1020px;">
+      <div id="canvas-container1" style="display:block;text-align:center;">Cargando página 1...</div>
+      <div id="canvas-container2" style="display:none;text-align:center;">Cargando página 2...</div>
     </div>
     <button id="descargar">Descargar PDF</button>
     <button id="editar">Editar datos</button>
   `;
 
-  renderHtmlInstitucional('html-pagina1', datosHoja1, datosHoja2, 1);
-  renderHtmlInstitucional('html-pagina2', datosHoja1, datosHoja2, 2);
+  renderHtmlInstitucional(document.getElementById('canvas-container1'), datosHoja1, datosHoja2, 1);
+  renderHtmlInstitucional(document.getElementById('canvas-container2'), datosHoja1, datosHoja2, 2);
 
+  // Renderizar canvas para ambas páginas
   setTimeout(() => {
-    html2canvas(document.getElementById('html-pagina1'), {backgroundColor: "#fff"}).then(canvas1 => {
-      document.getElementById('html-pagina1').innerHTML = '';
-      canvas1.style.width = '100%';
-      canvas1.style.height = 'auto';
-      document.getElementById('html-pagina1').appendChild(canvas1);
-      html2canvas(document.getElementById('html-pagina2'), {backgroundColor: "#fff"}).then(canvas2 => {
-        document.getElementById('html-pagina2').innerHTML = '';
-        canvas2.style.width = '100%';
-        canvas2.style.height = 'auto';
-        document.getElementById('html-pagina2').appendChild(canvas2);
-      });
-    });
-  }, 500);
+    // Página 1
+    let tempDiv1 = document.createElement('div');
+    tempDiv1.style.position = 'absolute';
+    tempDiv1.style.left = '-9999px';
+    tempDiv1.id = 'html-pagina1';
+    document.body.appendChild(tempDiv1);
+    renderHtmlInstitucional(tempDiv1, datosHoja1, datosHoja2, 1);
 
+    html2canvas(tempDiv1, {backgroundColor: "#fff", useCORS: true}).then(c1 => {
+      let cont1 = document.getElementById('canvas-container1');
+      cont1.innerHTML = '';
+      c1.style.width = '100%';
+      c1.style.height = 'auto';
+      cont1.appendChild(c1);
+      document.body.removeChild(tempDiv1);
+    });
+
+    // Página 2
+    let tempDiv2 = document.createElement('div');
+    tempDiv2.style.position = 'absolute';
+    tempDiv2.style.left = '-9999px';
+    tempDiv2.id = 'html-pagina2';
+    document.body.appendChild(tempDiv2);
+    renderHtmlInstitucional(tempDiv2, datosHoja1, datosHoja2, 2);
+
+    html2canvas(tempDiv2, {backgroundColor: "#fff", useCORS: true}).then(c2 => {
+      let cont2 = document.getElementById('canvas-container2');
+      cont2.innerHTML = '';
+      c2.style.width = '100%';
+      c2.style.height = 'auto';
+      cont2.appendChild(c2);
+      document.body.removeChild(tempDiv2);
+    });
+  }, 100);
+
+  // Botones de paginación
   document.getElementById('btnPag1').onclick = () => {
-    document.getElementById('html-pagina1').style.display = '';
-    document.getElementById('html-pagina2').style.display = 'none';
+    document.getElementById('canvas-container1').style.display = 'block';
+    document.getElementById('canvas-container2').style.display = 'none';
     document.getElementById('btnPag1').classList.add('active');
     document.getElementById('btnPag2').classList.remove('active');
   };
   document.getElementById('btnPag2').onclick = () => {
-    document.getElementById('html-pagina1').style.display = 'none';
-    document.getElementById('html-pagina2').style.display = '';
+    document.getElementById('canvas-container1').style.display = 'none';
+    document.getElementById('canvas-container2').style.display = 'block';
     document.getElementById('btnPag2').classList.add('active');
     document.getElementById('btnPag1').classList.remove('active');
   };
@@ -598,7 +641,7 @@ function renderPrevisualizacion() {
 }
 
 // --- Renderiza el HTML institucional con los datos ---
-function renderHtmlInstitucional(divId, hoja1, hoja2, pagina) {
+function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
   let html = '';
   if (pagina === 1) {
     html = `
@@ -638,11 +681,13 @@ function renderHtmlInstitucional(divId, hoja1, hoja2, pagina) {
         <div style="margin-top:8px;"><b>Observaciones generales:</b> ${hoja1.observaciones||''}</div>
         <div style="margin-top:16px;font-weight:bold;color:#e30613;">EVIDENCIA FOTOGRÁFICA</div>
         <div style="display:flex;gap:8px;">
-          ${evidencias1.map(ev=>ev?`<div><img src="${ev}" style="width:120px;height:80px;object-fit:cover;"></div>`:'').join('')}
+          ${(Array.isArray(hoja1.evidencias) && hoja1.evidencias.length > 0 && hoja1.evidencias.some(ev => ev && ev.img))
+            ? hoja1.evidencias.map(ev => (ev && ev.img) ? `<div><img src="${ev.img}" style="width:120px;height:80px;object-fit:cover;"><div style="font-size:10px;">${ev.desc||''}</div></div>` : '').join('')
+            : '<span style="color:#888;font-size:12px;">Sin evidencias adjuntas</span>'}
         </div>
         <div style="margin-top:16px;">
           <b>Firma funcionario:</b><br>
-          ${firmas[0]?`<img src="${firmas[0]}" style="width:120px;height:40px;">`:''}
+          ${(hoja1.firma) ? `<img src="${hoja1.firma}" style="width:120px;height:40px;">` : '<span style="color:#888;font-size:12px;">Sin firma</span>'}
         </div>
         <div><b>Nombre:</b> ${hoja1.nombreFuncionario||''}</div>
         <div><b>Fecha elaboración informe:</b> ${hoja1.fechaElaboracion||''}</div>
@@ -702,7 +747,9 @@ function renderHtmlInstitucional(divId, hoja1, hoja2, pagina) {
         </table>
         <div style="margin-top:16px;font-weight:bold;color:#e30613;">EVIDENCIA FOTOGRÁFICA DE LA ACTIVIDAD</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          ${evidencias2.map(ev=>ev?`<div><img src="${ev}" style="width:120px;height:80px;object-fit:cover;"></div>`:'').join('')}
+          ${(Array.isArray(hoja2.evidencias) && hoja2.evidencias.length > 0 && hoja2.evidencias.some(ev => ev && ev.img))
+            ? hoja2.evidencias.map(ev => (ev && ev.img) ? `<div><img src="${ev.img}" style="width:120px;height:80px;object-fit:cover;"><div style="font-size:10px;">${ev.desc||''}</div></div>` : '').join('')
+            : '<span style="color:#888;font-size:12px;">Sin evidencias adjuntas</span>'}
         </div>
         <div style="margin-top:8px;"><b>¿Falla resuelta?:</b> ${hoja2.fallaResuelta||''}</div>
         <div><b>Observaciones de la actividad:</b> ${hoja2.observacionesActividad||''}</div>
@@ -710,7 +757,7 @@ function renderHtmlInstitucional(divId, hoja1, hoja2, pagina) {
       </div>
     `;
   }
-  document.getElementById(divId).innerHTML = html;
+  divElem.innerHTML = html;
 }
 
 // --- Genera el PDF con el formato institucional ---
@@ -727,12 +774,12 @@ function generarPDF(hoja1, hoja2, cb) {
   div2.style.left = '-9999px';
   div2.id = 'pdf-html2';
   document.body.appendChild(div2);
-  renderHtmlInstitucional('pdf-html1', hoja1, hoja2, 1);
-  renderHtmlInstitucional('pdf-html2', hoja1, hoja2, 2);
+  renderHtmlInstitucional(div1, hoja1, hoja2, 1);
+  renderHtmlInstitucional(div2, hoja1, hoja2, 2);
 
   setTimeout(() => {
-    html2canvas(div1, {backgroundColor: "#fff", scale:2}).then(canvas1 => {
-      html2canvas(div2, {backgroundColor: "#fff", scale:2}).then(canvas2 => {
+    html2canvas(div1, {backgroundColor: "#fff", scale:2, useCORS: true}).then(canvas1 => {
+      html2canvas(div2, {backgroundColor: "#fff", scale:2, useCORS: true}).then(canvas2 => {
         pdf.addImage(canvas1.toDataURL('image/jpeg',0.92), 'JPEG', 0, 0, 700, 990);
         pdf.addPage([700,990]);
         pdf.addImage(canvas2.toDataURL('image/jpeg',0.92), 'JPEG', 0, 0, 700, 990);
