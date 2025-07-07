@@ -223,8 +223,10 @@ function renderHoja1() {
     evHtml += `
       <label>Evidencia ${i+1}</label>
       <div class="evidencia-btns">
-        <button type="button" id="adjuntar1_${i}">Adjuntar foto</button>
-        <input type="file" accept="image/*" capture="environment" id="file1_${i}" style="display:none;" />
+        <button type="button" id="tomarfoto1_${i}">Tomar foto</button>
+        <input type="file" accept="image/*" capture="environment" id="filecam1_${i}" style="display:none;" />
+        <button type="button" id="abrirfotos1_${i}">Abrir fotos</button>
+        <input type="file" accept="image/*" id="filegal1_${i}" style="display:none;" />
       </div>
       <img id="prev1_${i}" class="preview" style="display:${evidencias1[i]?'block':'none'}" src="${evidencias1[i]||''}"/>
       <input id="desc1_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja1.evidencias?.[i]?.desc||''}" />
@@ -232,10 +234,22 @@ function renderHoja1() {
   }
   document.getElementById('evidencias1').innerHTML = evHtml;
   for (let i = 0; i < 4; i++) {
-    document.getElementById(`adjuntar1_${i}`).onclick = () => {
-      document.getElementById(`file1_${i}`).click();
+    document.getElementById(`tomarfoto1_${i}`).onclick = () => {
+      document.getElementById(`filecam1_${i}`).click();
     };
-    document.getElementById(`file1_${i}`).onchange = e => {
+    document.getElementById(`filecam1_${i}`).onchange = e => {
+      if (e.target.files[0]) {
+        toBase64(e.target.files[0], b64 => {
+          evidencias1[i] = b64;
+          document.getElementById(`prev1_${i}`).src = b64;
+          document.getElementById(`prev1_${i}`).style.display = 'block';
+        });
+      }
+    };
+    document.getElementById(`abrirfotos1_${i}`).onclick = () => {
+      document.getElementById(`filegal1_${i}`).click();
+    };
+    document.getElementById(`filegal1_${i}`).onchange = e => {
       if (e.target.files[0]) {
         toBase64(e.target.files[0], b64 => {
           evidencias1[i] = b64;
@@ -476,8 +490,10 @@ function renderHoja2() {
     evHtml += `
       <label>Evidencia ${i+1}</label>
       <div class="evidencia-btns">
-        <button type="button" id="adjuntar2_${i}">Adjuntar foto</button>
-        <input type="file" accept="image/*" capture="environment" id="file2_${i}" style="display:none;" />
+        <button type="button" id="tomarfoto2_${i}">Tomar foto</button>
+        <input type="file" accept="image/*" capture="environment" id="filecam2_${i}" style="display:none;" />
+        <button type="button" id="abrirfotos2_${i}">Abrir fotos</button>
+        <input type="file" accept="image/*" id="filegal2_${i}" style="display:none;" />
       </div>
       <img id="prev2_${i}" class="preview" style="display:${evidencias2[i]?'block':'none'}" src="${evidencias2[i]||''}"/>
       <input id="desc2_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja2.evidencias?.[i]?.desc||''}" />
@@ -485,10 +501,22 @@ function renderHoja2() {
   }
   document.getElementById('evidencias2').innerHTML = evHtml;
   for (let i = 0; i < 6; i++) {
-    document.getElementById(`adjuntar2_${i}`).onclick = () => {
-      document.getElementById(`file2_${i}`).click();
+    document.getElementById(`tomarfoto2_${i}`).onclick = () => {
+      document.getElementById(`filecam2_${i}`).click();
     };
-    document.getElementById(`file2_${i}`).onchange = e => {
+    document.getElementById(`filecam2_${i}`).onchange = e => {
+      if (e.target.files[0]) {
+        toBase64(e.target.files[0], b64 => {
+          evidencias2[i] = b64;
+          document.getElementById(`prev2_${i}`).src = b64;
+          document.getElementById(`prev2_${i}`).style.display = 'block';
+        });
+      }
+    };
+    document.getElementById(`abrirfotos2_${i}`).onclick = () => {
+      document.getElementById(`filegal2_${i}`).click();
+    };
+    document.getElementById(`filegal2_${i}`).onchange = e => {
       if (e.target.files[0]) {
         toBase64(e.target.files[0], b64 => {
           evidencias2[i] = b64;
