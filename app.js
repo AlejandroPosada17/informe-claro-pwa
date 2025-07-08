@@ -439,12 +439,10 @@ function renderHoja2() {
             <th>Marca</th>
             <th>Modelo</th>
             <th>Serial</th>
-            <th></th>
           </tr>
         </thead>
         <tbody id="tabla-repuestos"></tbody>
       </table>
-      <button type="button" id="agregarRepuesto">Agregar repuesto</button>
       <hr>
       <label>Evidencias fotográficas</label>
       <div id="evidencias2"></div>
@@ -460,28 +458,24 @@ function renderHoja2() {
       <button type="button" id="volver1">Volver</button>
     </form>
   `;
-  // Repuestos
+  // Repuestos: 4 filas fijas, sin agregar/eliminar
   let repuestos = datosHoja2.repuestos || [];
+  while (repuestos.length < 4) repuestos.push({descripcion:'',marca:'',modelo:'',serial:''});
+  repuestos = repuestos.slice(0,4);
+  datosHoja2.repuestos = repuestos;
   function renderRepuestos() {
     let html = '';
-    for (let i = 0; i < repuestos.length; i++) {
+    for (let i = 0; i < 4; i++) {
       html += `<tr>
         <td><input value="${repuestos[i].descripcion||''}" onchange="this.parentNode.parentNode.repuesto.descripcion=this.value" /></td>
         <td><input value="${repuestos[i].marca||''}" onchange="this.parentNode.parentNode.repuesto.marca=this.value" /></td>
         <td><input value="${repuestos[i].modelo||''}" onchange="this.parentNode.parentNode.repuesto.modelo=this.value" /></td>
         <td><input value="${repuestos[i].serial||''}" onchange="this.parentNode.parentNode.repuesto.serial=this.value" /></td>
-        <td><button type="button" onclick="this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);repuestos.splice(${i},1);">🗑️</button></td>
       </tr>`;
     }
     document.getElementById('tabla-repuestos').innerHTML = html;
     Array.from(document.querySelectorAll('#tabla-repuestos tr')).forEach((tr, i) => tr.repuesto = repuestos[i]);
   }
-  document.getElementById('agregarRepuesto').onclick = () => {
-    repuestos.push({descripcion:'',marca:'',modelo:'',serial:''});
-    renderRepuestos();
-    datosHoja2.repuestos = repuestos;
-    guardarLocal();
-  };
   renderRepuestos();
 
   // Evidencias
@@ -573,8 +567,10 @@ function renderPrevisualizacion() {
       <div id="canvas-container1" style="display:block;text-align:center;"></div>
       <div id="canvas-container2" style="display:none;text-align:center;"></div>
     </div>
-    <button id="descargar">Descargar PDF</button>
-    <button id="editar">Editar datos</button>
+    <div style="display:flex;justify-content:center;gap:16px;margin-top:16px;">
+      <button id="descargar">Descargar PDF</button>
+      <button id="editar">Editar datos</button>
+    </div>
   `;
 
   renderHtmlInstitucional(document.getElementById('canvas-container1'), datosHoja1, datosHoja2, 1);
@@ -654,117 +650,314 @@ function renderPrevisualizacion() {
 function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
   let html = '';
   if (pagina === 1) {
+    // --- FORMATO INSTITUCIONAL PAGINA 1 ---
     html = `
-      <div style="width:700px;min-height:990px;border:1px solid #e30613;padding:32px 32px 60px 32px;box-sizing:border-box;position:relative;background:#fff;">
-        <img src="logo-claro.png" style="width:70px;position:absolute;top:32px;left:32px;">
-        <div style="text-align:center;font-weight:bold;font-size:18px;color:#e30613;">CLARO OPERACIÓN Y MANTENIMIENTO<br>ESTADO GENERAL DE SITIO</div>
-        <table style="width:100%;margin-top:32px;">
-          <tr>
-            <td><b>Nombre de estación:</b> ${hoja1.nombreEstacion||''}</td>
-            <td><b>Categoría:</b> ${hoja1.categoria||''}</td>
-            <td><b>Zona:</b> ${hoja1.zona||''}</td>
-          </tr>
-          <tr>
-            <td><b>Responsable:</b> ${hoja1.responsable||''}</td>
-            <td><b>Departamento:</b> ${hoja1.departamento||''}</td>
-            <td><b>Fecha de ejecución:</b> ${hoja1.fechaEjecucion||''}</td>
-          </tr>
-          <tr>
-            <td colspan="3"><b>Dirección:</b> ${hoja1.direccion||''}</td>
-          </tr>
-        </table>
-        <div style="margin-top:16px;font-weight:bold;color:#e30613;">ÁREAS COMUNES Y LOCATIVOS</div>
-        <table style="width:100%;font-size:11px;">
-          <tr>
-            <th>Ítem</th>
-            <th>¿Sí/No?</th>
-            <th>Descripción</th>
-          </tr>
-          ${hoja1.items?.map((item,i)=>`
+      <div style="width:900px;min-height:990px;border:3px solid #000;background:#fff;font-family:Arial,sans-serif;color:#000;box-sizing:border-box;position:relative;">
+        <div style="display:flex;align-items:center;padding:8px 16px 0 16px;">
+          <img src="logo-claro.png" style="width:70px;height:70px;">
+          <div style="flex:1;text-align:center;">
+            <div style="font-weight:bold;color:#000;font-size:18px;line-height:1.2;">
+              CLARO OPERACION Y MANTENIMIENTO<br>
+              PERSONAL PROPIO - PROVEEDORES<br>
+              ESTADO GENERAL DE SITIO
+            </div>
+          </div>
+        </div>
+        <div style="margin:8px 0 0 0;">
+          <div style="background:#e30613;color:#fff;font-weight:bold;text-align:center;padding:2px 0;font-size:14px;border:1px solid #000;border-bottom:none;">INFORMACION GENERAL</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
             <tr>
-              <td>${i+1}</td>
-              <td>${item.respuesta||''}</td>
-              <td>${item.descripcion||''}</td>
+              <td style="border:1px solid #000;font-weight:bold;width:20%;">NOMBRE DE ESTACIÓN:</td>
+              <td style="border:1px solid #000;width:30%;">${hoja1.nombreEstacion||''}</td>
+              <td style="border:1px solid #000;font-weight:bold;width:20%;">CATEGORIA:</td>
+              <td style="border:1px solid #000;width:30%;">${hoja1.categoria||''}</td>
             </tr>
-          `).join('')}
-        </table>
-        <div style="margin-top:8px;"><b>Observaciones generales:</b> ${hoja1.observaciones||''}</div>
-        <div style="margin-top:16px;font-weight:bold;color:#e30613;">EVIDENCIA FOTOGRÁFICA</div>
-        <div style="display:flex;gap:8px;">
-          ${(Array.isArray(hoja1.evidencias) && hoja1.evidencias.length > 0 && hoja1.evidencias.some(ev => ev && ev.img))
-            ? hoja1.evidencias.map(ev => (ev && ev.img) ? `<div><img src="${ev.img}" style="width:120px;height:80px;object-fit:cover;"><div style="font-size:10px;">${ev.desc||''}</div></div>` : '').join('')
-            : '<span style="color:#888;font-size:12px;">Sin evidencias adjuntas</span>'}
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;">ZONA:</td>
+              <td style="border:1px solid #000;">${hoja1.zona||''}</td>
+              <td style="border:1px solid #000;font-weight:bold;">RESPONSABLE:</td>
+              <td style="border:1px solid #000;">${hoja1.responsable||''}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;">DEPARTAMENTO:</td>
+              <td style="border:1px solid #000;">${hoja1.departamento||''}</td>
+              <td style="border:1px solid #000;font-weight:bold;">FECHA EJECUCIÓN:</td>
+              <td style="border:1px solid #000;">${hoja1.fechaEjecucion||''}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;">DIRECCIÓN:</td>
+              <td style="border:1px solid #000;" colspan="3">${hoja1.direccion||''}</td>
+            </tr>
+          </table>
         </div>
-        <div style="margin-top:16px;">
-          <b>Firma funcionario:</b><br>
-          ${(hoja1.firma) ? `<img src="${hoja1.firma}" style="width:120px;height:40px;">` : '<span style="color:#888;font-size:12px;">Sin firma</span>'}
+        <div style="margin-top:8px;">
+          <div style="background:#e30613;color:#fff;font-weight:bold;text-align:center;padding:2px 0;font-size:14px;border:1px solid #000;border-bottom:none;">AREAS COMUNES Y LOCATIVOS</div>
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <tr>
+              <th style="border:1px solid #000;background:#e30613;color:#fff;">ITEM</th>
+              <th style="border:1px solid #000;background:#e30613;color:#fff;">¿SI/NO?</th>
+              <th style="border:1px solid #000;background:#e30613;color:#fff;">DESCRIPCION/COMENTARIOS</th>
+            </tr>
+            ${(() => {
+              const items = [
+                "HALLAZGOS EN LA TORRE, Pintura, Corrosión, Línea de vida (Evidenciar para SI)",
+                "HALLAZGO EN PANORÁMICA DE LA ESTACION (Evidenciar para SI)",
+                "HALLAZGO EN LA ENTRADA PRINCIPAL, PUERTAS (Evidenciar para SI)",
+                "EXTINTOR VENCIDO O DETERIORADO (Evidenciar para SI)",
+                "HALLAZGO EN OBRA CIVIL (edificaciones, goteras, escalerillas, techos) (Evidenciar para SI)",
+                "NECESIDAD DE PODA O FUMIGACION (Evidenciar para SI)",
+                "PLAGAS EN SITIO (ratas, aves, serpientes, abejas, otro) (Evidenciar para SI)",
+                "PROBLEMA CON LUCES EXTERNAS, INTERNAS (Evidenciar para SI)",
+                "EVIDENCIA DE HURTOS (Equipos faltantes)",
+                "HALLAZGOS EN ENTORNO, CONCERTINAS Y CERRAMIENTOS (Evidenciar para SI)",
+                "PORCENTAJE DE TANQUES DE COMBUSTIBLE",
+                "Se encuentran elementos abandonados en la estación(elementos de implementación, renovación, otros)?",
+                "Se encuentran basuras, escombros dentro de la estación?"
+              ];
+              return items.map((item, i) => `
+                <tr>
+                  <td style='border:1px solid #000;'>${item}</td>
+                  <td style='border:1px solid #000;text-align:center;'>${hoja1.items?.[i]?.respuesta||''}</td>
+                  <td style='border:1px solid #000;'>${hoja1.items?.[i]?.descripcion||''}</td>
+                </tr>
+              `).join('');
+            })()}
+          </table>
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;">OBSERVACIONES GENERALES</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;height:48px;vertical-align:top;">${hoja1.observaciones||''}</td>
+            </tr>
+          </table>
         </div>
-        <div><b>Nombre:</b> ${hoja1.nombreFuncionario||''}</div>
-        <div><b>Fecha elaboración informe:</b> ${hoja1.fechaElaboracion||''}</div>
-        <div style="position:absolute;bottom:16px;left:32px;color:#e30613;font-size:11px;">Clasificación: Uso Interno. Documento Claro Colombia</div>
+        <div style="margin-top:8px;">
+          <div style="background:#e30613;color:#fff;font-weight:bold;text-align:center;padding:2px 0;font-size:14px;border:1px solid #000;border-bottom:none;">EVIDENCIA FOTOGRAFICA</div>
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <tr>
+              <th style="border:1px solid #000;">EVIDENCIA 1 (describir)</th>
+              <th style="border:1px solid #000;">EVIDENCIA 2 (describir)</th>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
+                ${hoja1.evidencias?.[0]?.img ? `<img src=\"${hoja1.evidencias[0].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              </td>
+              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
+                ${hoja1.evidencias?.[1]?.img ? `<img src=\"${hoja1.evidencias[1].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              </td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;height:24px;"><b>Descripción:</b> ${hoja1.evidencias?.[0]?.desc||''}</td>
+              <td style="border:1px solid #000;height:24px;"><b>Descripción:</b> ${hoja1.evidencias?.[1]?.desc||''}</td>
+            </tr>
+            <tr>
+              <th style="border:1px solid #000;">EVIDENCIA 3 (describir)</th>
+              <th style="border:1px solid #000;">EVIDENCIA 4 (describir)</th>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
+                ${hoja1.evidencias?.[2]?.img ? `<img src=\"${hoja1.evidencias[2].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              </td>
+              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
+                ${hoja1.evidencias?.[3]?.img ? `<img src=\"${hoja1.evidencias[3].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              </td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;height:24px;"><b>Descripción:</b> ${hoja1.evidencias?.[2]?.desc||''}</td>
+              <td style="border:1px solid #000;height:24px;"><b>Descripción:</b> ${hoja1.evidencias?.[3]?.desc||''}</td>
+            </tr>
+          </table>
+        </div>
+        <div style="display:flex;align-items:flex-start;margin-top:8px;">
+          <div style="width:50%;">
+            <div style="font-weight:bold;font-size:12px;">FIRMA FUNCIONARIO</div>
+            <div style="height:40px;margin-bottom:4px;text-align:center;">
+              ${hoja1.firma ? `<img src=\"${hoja1.firma}\" style=\"max-height:38px;max-width:100%;border:1px solid #000;\">` : ''}
+            </div>
+          </div>
+          <div style="width:50%;padding-left:24px;">
+            <div style="font-weight:bold;font-size:12px;">NOMBRE</div>
+            <div style="height:24px;">${hoja1.nombreFuncionario||''}</div>
+            <div style="font-weight:bold;font-size:12px;">FECHA ELABORACION INFORME</div>
+            <div style="height:24px;">${hoja1.fechaElaboracion||''}</div>
+          </div>
+        </div>
       </div>
+      <div style=\"width:900px;text-align:center;margin:0 auto;font-size:11px;color:#000;\">Clasificación: Uso Interno. Documento Claro Colombia</div>
     `;
   } else {
+    // --- FORMATO INSTITUCIONAL PAGINA 2 ---
     html = `
-      <div style="width:700px;min-height:990px;border:1px solid #e30613;padding:32px 32px 60px 32px;box-sizing:border-box;position:relative;background:#fff;">
-        <img src="logo-claro.png" style="width:70px;position:absolute;top:32px;left:32px;">
-        <div style="text-align:center;font-weight:bold;font-size:18px;color:#e30613;">ACTIVIDAD TÉCNICA EN ESTACIÓN</div>
-        <table style="width:100%;margin-top:32px;">
-          <tr>
-            <td><b>Regional:</b> ${hoja2.regional||''}</td>
-            <td><b>Tipo de estación:</b> ${hoja2.tipoEstacion||''}</td>
-            <td><b>Fecha ejecución:</b> ${hoja2.fechaEjecucion||''}</td>
-          </tr>
-          <tr>
-            <td><b>Tipo de sitio:</b> ${hoja2.tipoSitio||''}</td>
-            <td><b>Fecha fin actividad:</b> ${hoja2.fechaFinActividad||''}</td>
-            <td><b>Técnico:</b> ${hoja2.tecnico||''}</td>
-          </tr>
-          <tr>
-            <td><b>¿Implica exclusión?:</b> ${hoja2.exclusion||''}</td>
-            <td><b>Tipo de actividad:</b> ${hoja2.tipoActividad||''}</td>
-            <td><b>Tipo de equipo en falla:</b> ${hoja2.tipoEquipoFalla||''}</td>
-          </tr>
-          <tr>
-            <td><b>Marca:</b> ${hoja2.marca||''}</td>
-            <td><b>Modelo:</b> ${hoja2.modelo||''}</td>
-            <td><b>¿Presenta afectación de servicios?:</b> ${hoja2.afectacionServicios||''}</td>
-          </tr>
-          <tr>
-            <td><b>¿Cambio?:</b> ${hoja2.cambio||''}</td>
-            <td><b>¿Instalación?:</b> ${hoja2.instalacion||''}</td>
-            <td></td>
-          </tr>
-        </table>
-        <div style="margin-top:8px;"><b>Descripción de la falla:</b> ${hoja2.descripcionFalla||''}</div>
-        <div style="margin-top:8px;"><b>Descripción de la solución:</b> ${hoja2.descripcionSolucion||''}</div>
-        <div style="margin-top:16px;font-weight:bold;color:#e30613;">CAMBIO DE REPUESTOS Y/O PARTES</div>
-        <table style="width:100%;font-size:11px;">
-          <tr>
-            <th>Descripción</th>
-            <th>Marca</th>
-            <th>Modelo</th>
-            <th>Serial</th>
-          </tr>
-          ${(hoja2.repuestos||[]).map(rep=>`
-            <tr>
-              <td>${rep.descripcion||''}</td>
-              <td>${rep.marca||''}</td>
-              <td>${rep.modelo||''}</td>
-              <td>${rep.serial||''}</td>
-            </tr>
-          `).join('')}
-        </table>
-        <div style="margin-top:16px;font-weight:bold;color:#e30613;">EVIDENCIA FOTOGRÁFICA DE LA ACTIVIDAD</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          ${(Array.isArray(hoja2.evidencias) && hoja2.evidencias.length > 0 && hoja2.evidencias.some(ev => ev && ev.img))
-            ? hoja2.evidencias.map(ev => (ev && ev.img) ? `<div><img src="${ev.img}" style="width:120px;height:80px;object-fit:cover;"><div style="font-size:10px;">${ev.desc||''}</div></div>` : '').join('')
-            : '<span style="color:#888;font-size:12px;">Sin evidencias adjuntas</span>'}
+      <div style="width:900px;min-height:1200px;border:3px solid #000;background:#fff;font-family:Arial,sans-serif;color:#000;box-sizing:border-box;position:relative;">
+        <div style="display:flex;align-items:center;padding:8px 16px 0 16px;">
+          <img src="logo-claro.png" style="width:70px;height:70px;">
+          <div style="flex:1;text-align:center;">
+            <div style="font-weight:bold;color:#000;font-size:18px;line-height:1.2;">
+              OPERACION Y MANTENIMIENTO<br>
+              SITE OWNER CLARO<br>
+              MANTENIMIENTO CORRECTIVO Y EMERGENCIAS
+            </div>
+          </div>
         </div>
-        <div style="margin-top:8px;"><b>¿Falla resuelta?:</b> ${hoja2.fallaResuelta||''}</div>
-        <div><b>Observaciones de la actividad:</b> ${hoja2.observacionesActividad||''}</div>
-        <div style="position:absolute;bottom:16px;left:32px;color:#e30613;font-size:11px;">Clasificación: Uso Interno. Documento Claro Colombia</div>
+        <div style="margin:8px 0 0 0;">
+          <div style="background:#e30613;color:#fff;font-weight:bold;text-align:center;padding:2px 0;font-size:14px;border:1px solid #000;border-bottom:none;">INFORMACION GENERAL</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;width:20%;">NOMBRE DE ESTACIÓN:</td>
+              <td style="border:1px solid #000;width:30%;">${hoja1.nombreEstacion||''}</td>
+              <td style="border:1px solid #000;font-weight:bold;width:20%;">REGIONAL:</td>
+              <td style="border:1px solid #000;width:30%;">${hoja2.regional||''}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;">TIPO DE ESTACION:</td>
+              <td style="border:1px solid #000;">${hoja2.tipoEstacion||''}</td>
+              <td style="border:1px solid #000;font-weight:bold;">FECHA EJECUCIÓN:</td>
+              <td style="border:1px solid #000;">${hoja2.fechaEjecucion||''}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;">TIPO DE SITIO (Propio, Arrendado):</td>
+              <td style="border:1px solid #000;">${hoja2.tipoSitio||''}</td>
+              <td style="border:1px solid #000;font-weight:bold;">FECHA FIN ACTIVIDAD:</td>
+              <td style="border:1px solid #000;">${hoja2.fechaFinActividad||''}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;">TECNICO:</td>
+              <td style="border:1px solid #000;">${hoja2.tecnico||''}</td>
+              <td style="border:1px solid #000;font-weight:bold;">IMPLICA EXCLUSION?</td>
+              <td style="border:1px solid #000;">${hoja2.exclusion||''}</td>
+            </tr>
+          </table>
+        </div>
+        <div style="margin-top:8px;">
+          <div style="background:#e30613;color:#fff;font-weight:bold;text-align:center;padding:2px 0;font-size:14px;border:1px solid #000;border-bottom:none;">INFORMACION DE LA ACTIVIDAD</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;width:20%;">TIPO DE ACTIVIDAD:</td>
+              <td style="border:1px solid #000;width:30%;">${hoja2.tipoActividad||''}</td>
+              <td style="border:1px solid #000;font-weight:bold;width:20%;">TIPO DE EQUIPO EN FALLA:</td>
+              <td style="border:1px solid #000;width:30%;">${hoja2.tipoEquipoFalla||''}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;">MARCA:</td>
+              <td style="border:1px solid #000;">${hoja2.marca||''}</td>
+              <td style="border:1px solid #000;font-weight:bold;">MODELO:</td>
+              <td style="border:1px solid #000;">${hoja2.modelo||''}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;">PRESENTA AFECTACION DE SERVICIOS:</td>
+              <td style="border:1px solid #000;">${hoja2.afectacionServicios||''}</td>
+              <td style="border:1px solid #000;font-weight:bold;">CAMBIO:</td>
+              <td style="border:1px solid #000;">${hoja2.cambio||''}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;">INSTALACION:</td>
+              <td style="border:1px solid #000;">${hoja2.instalacion||''}</td>
+              <td style="border:1px solid #000;" colspan="2"></td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;">DESCRIPCION DE LA FALLA</td>
+              <td style="border:1px solid #000;" colspan="3">${hoja2.descripcionFalla||''}</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;font-weight:bold;">DESCRIPCION DE LA SOLUCION</td>
+              <td style="border:1px solid #000;" colspan="3">${hoja2.descripcionSolucion||''}</td>
+            </tr>
+          </table>
+        </div>
+        <div style="margin-top:8px;">
+          <div style="background:#e30613;color:#fff;font-weight:bold;text-align:center;padding:2px 0;font-size:14px;border:1px solid #000;border-bottom:none;">CAMBIO DE REPUESTOS Y/O PARTES (Para los casos que aplique)</div>
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <tr>
+              <th style="border:1px solid #000;">Descripción</th>
+              <th style="border:1px solid #000;">Marca</th>
+              <th style="border:1px solid #000;">Modelo</th>
+              <th style="border:1px solid #000;">Serial</th>
+            </tr>
+            ${(() => {
+              const reps = (hoja2.repuestos||[]).filter(r=>r.descripcion||r.marca||r.modelo||r.serial);
+              if (reps.length > 0) {
+                return reps.map(rep=>`
+                  <tr>
+                    <td style=\"border:1px solid #000;height:32px;\">${rep.descripcion||''}</td>
+                    <td style=\"border:1px solid #000;height:32px;\">${rep.marca||''}</td>
+                    <td style=\"border:1px solid #000;height:32px;\">${rep.modelo||''}</td>
+                    <td style=\"border:1px solid #000;height:32px;\">${rep.serial||''}</td>
+                  </tr>
+                `).join('');
+              } else {
+                return Array.from({length:4}).map(()=>`<tr><td style='border:1px solid #000;height:32px;'>&nbsp;</td><td style='border:1px solid #000;height:32px;'>&nbsp;</td><td style='border:1px solid #000;height:32px;'>&nbsp;</td><td style='border:1px solid #000;height:32px;'>&nbsp;</td></tr>`).join('');
+              }
+            })()}
+          </table>
+        </div>
+        <div style="margin-top:8px;">
+          <div style="background:#e30613;color:#fff;font-weight:bold;text-align:center;padding:2px 0;font-size:14px;border:1px solid #000;border-bottom:none;">EVIDENCIA FOTOGRÁFICA DE LA ACTIVIDAD</div>
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <tr>
+              <th style="border:1px solid #000;">EVIDENCIA DE LA FALLA (CMTS EN CORTO)</th>
+              <th style="border:1px solid #000;">EVIDENCIA (RETIRO DEL CMTS ENCORTO)</th>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
+                ${hoja2.evidencias?.[0]?.img ? `<img src=\"${hoja2.evidencias[0].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              </td>
+              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
+                ${hoja2.evidencias?.[1]?.img ? `<img src=\"${hoja2.evidencias[1].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              </td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;height:24px;"><b>Descripción:</b> ${hoja2.evidencias?.[0]?.desc||''}</td>
+              <td style="border:1px solid #000;height:24px;"><b>Descripción:</b> ${hoja2.evidencias?.[1]?.desc||''}</td>
+            </tr>
+            <tr>
+              <th style="border:1px solid #000;">EVIDENCIA (INSTALACION NUEVO CMTS)</th>
+              <th style="border:1px solid #000;">EVIDENCIA (CMTS ENPRODUCION)</th>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
+                ${hoja2.evidencias?.[2]?.img ? `<img src=\"${hoja2.evidencias[2].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              </td>
+              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
+                ${hoja2.evidencias?.[3]?.img ? `<img src=\"${hoja2.evidencias[3].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              </td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;height:24px;"><b>Descripción:</b> ${hoja2.evidencias?.[2]?.desc||''}</td>
+              <td style="border:1px solid #000;height:24px;"><b>Descripción:</b> ${hoja2.evidencias?.[3]?.desc||''}</td>
+            </tr>
+            <tr>
+              <th style="border:1px solid #000;">EVIDENCIA ADICIONAL</th>
+              <th style="border:1px solid #000;">EVIDENCIA ADICIONAL</th>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;height:60px;text-align:center;vertical-align:middle;">
+                ${hoja2.evidencias?.[4]?.img ? `<img src=\"${hoja2.evidencias[4].img}\" style=\"max-width:100%;max-height:50px;\">` : ''}
+              </td>
+              <td style="border:1px solid #000;height:60px;text-align:center;vertical-align:middle;">
+                ${hoja2.evidencias?.[5]?.img ? `<img src=\"${hoja2.evidencias[5].img}\" style=\"max-width:100%;max-height:50px;\">` : ''}
+              </td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000;height:24px;"><b>Descripción:</b> ${hoja2.evidencias?.[4]?.desc||''}</td>
+              <td style="border:1px solid #000;height:24px;"><b>Descripción:</b> ${hoja2.evidencias?.[5]?.desc||''}</td>
+            </tr>
+          </table>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;">
+          <tr>
+            <td style="border:1px solid #000;font-weight:bold;width:20%;">FALLA RESUELTA:</td>
+            <td style="border:1px solid #000;width:30%;">${hoja2.fallaResuelta||''}</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="border:1px solid #000;font-weight:bold;">OBSERVACIONES DE LA ACTIVIDAD</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="border:1px solid #000;height:48px;vertical-align:top;">${hoja2.observacionesActividad||''}</td>
+          </tr>
+        </table>
       </div>
+      <div style=\"width:900px;text-align:center;margin:0 auto;font-size:11px;color:#000;\">Clasificación: Uso Interno. Documento Claro Colombia</div>
     `;
   }
   divElem.innerHTML = html;
