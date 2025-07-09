@@ -252,10 +252,10 @@ function renderHoja1() {
     document.getElementById(`filegal1_${i}`).onchange = e => {
       if (e.target.files[0]) {
         toBase64(e.target.files[0], b64 => {
-          evidencias1[i] = b64;
-          document.getElementById(`prev1_${i}`).src = b64;
-          document.getElementById(`prev1_${i}`).style.display = 'block';
-        });
+        evidencias1[i] = b64;
+        document.getElementById(`prev1_${i}`).src = b64;
+        document.getElementById(`prev1_${i}`).style.display = 'block';
+      });
       }
     };
     document.getElementById(`desc1_${i}`).oninput = guardarLocal;
@@ -513,10 +513,10 @@ function renderHoja2() {
     document.getElementById(`filegal2_${i}`).onchange = e => {
       if (e.target.files[0]) {
         toBase64(e.target.files[0], b64 => {
-          evidencias2[i] = b64;
-          document.getElementById(`prev2_${i}`).src = b64;
-          document.getElementById(`prev2_${i}`).style.display = 'block';
-        });
+        evidencias2[i] = b64;
+        document.getElementById(`prev2_${i}`).src = b64;
+        document.getElementById(`prev2_${i}`).style.display = 'block';
+      });
       }
     };
     document.getElementById(`desc2_${i}`).oninput = guardarLocal;
@@ -563,18 +563,52 @@ function renderPrevisualizacion() {
       <button id="btnPag1" class="active">Página 1</button>
       <button id="btnPag2">Página 2</button>
     </div>
-    <div class="previsualizacion-pdf" id="previsualizacion-pdf" style="visibility:hidden;">
-      <div id="canvas-container1" style="display:block;text-align:center;"></div>
-      <div id="canvas-container2" style="display:none;text-align:center;"></div>
+    <div class="previsualizacion-pdf" id="previsualizacion-pdf" style="position:relative;min-height:300px;">
+      <div id="loader-pdf" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;z-index:10;background:rgba(255,255,255,0.85);">
+        <div style="text-align:center;">
+          <div style="font-size:18px;font-weight:bold;margin-bottom:16px;">Generando previsualización...</div>
+          <div style="width:220px;height:16px;background:#eee;border-radius:8px;overflow:hidden;display:inline-block;">
+            <div id="loader-bar" style="height:100%;width:0%;background:#e30613;transition:width 0.3s;"></div>
+          </div>
+        </div>
+      </div>
+      <div id="canvas-container1" style="display:block;text-align:center;visibility:hidden;"></div>
+      <div id="canvas-container2" style="display:none;text-align:center;visibility:hidden;"></div>
     </div>
     <div style="display:flex;justify-content:center;gap:16px;margin-top:16px;">
-      <button id="descargar">Descargar PDF</button>
-      <button id="editar">Editar datos</button>
+    <button id="descargar">Descargar PDF</button>
+    <button id="editar">Editar datos</button>
     </div>
   `;
 
+  // Loader/progress bar logic
+  let loaderBar = null;
+  let loaderInterval = null;
+  function startLoader() {
+    loaderBar = document.getElementById('loader-bar');
+    let progress = 0;
+    loaderBar.style.width = '0%';
+    loaderInterval = setInterval(() => {
+      progress += Math.random() * 10 + 5; // avance variable
+      if (progress > 90) progress = 90; // nunca llega al 100% hasta que termine
+      loaderBar.style.width = progress + '%';
+    }, 200);
+  }
+  function finishLoader() {
+    if (loaderInterval) clearInterval(loaderInterval);
+    if (loaderBar) loaderBar.style.width = '100%';
+    setTimeout(() => {
+      let loader = document.getElementById('loader-pdf');
+      if (loader) loader.style.display = 'none';
+      document.getElementById('canvas-container1').style.visibility = 'visible';
+      document.getElementById('canvas-container2').style.visibility = 'visible';
+    }, 350);
+  }
+
   renderHtmlInstitucional(document.getElementById('canvas-container1'), datosHoja1, datosHoja2, 1);
   renderHtmlInstitucional(document.getElementById('canvas-container2'), datosHoja1, datosHoja2, 2);
+
+  startLoader();
 
   // Renderizar canvas para ambas páginas
   setTimeout(() => {
@@ -593,7 +627,6 @@ function renderPrevisualizacion() {
       c1.style.height = 'auto';
       cont1.appendChild(c1);
       document.body.removeChild(tempDiv1);
-
       // Página 2
       let tempDiv2 = document.createElement('div');
       tempDiv2.style.position = 'absolute';
@@ -601,7 +634,6 @@ function renderPrevisualizacion() {
       tempDiv2.id = 'html-pagina2';
       document.body.appendChild(tempDiv2);
       renderHtmlInstitucional(tempDiv2, datosHoja1, datosHoja2, 2);
-
       html2canvas(tempDiv2, {backgroundColor: "#fff", useCORS: true}).then(c2 => {
         let cont2 = document.getElementById('canvas-container2');
         while (cont2.firstChild) cont2.removeChild(cont2.firstChild);
@@ -609,8 +641,7 @@ function renderPrevisualizacion() {
         c2.style.height = 'auto';
         cont2.appendChild(c2);
         document.body.removeChild(tempDiv2);
-        // Mostrar la previsualización solo cuando ambos canvas están listos
-        document.getElementById('previsualizacion-pdf').style.visibility = 'visible';
+        finishLoader();
       });
     });
   }, 100);
@@ -666,19 +697,19 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
         <div style="margin:8px 0 0 0;">
           <div style="background:#e30613;color:#fff;font-weight:bold;text-align:center;padding:2px 0;font-size:14px;border:1px solid #000;border-bottom:none;">INFORMACION GENERAL</div>
           <table style="width:100%;border-collapse:collapse;font-size:12px;">
-            <tr>
+          <tr>
               <td style="border:1px solid #000;font-weight:bold;width:20%;">NOMBRE DE ESTACIÓN:</td>
               <td style="border:1px solid #000;width:30%;">${hoja1.nombreEstacion||''}</td>
               <td style="border:1px solid #000;font-weight:bold;width:20%;">CATEGORIA:</td>
               <td style="border:1px solid #000;width:30%;">${hoja1.categoria||''}</td>
-            </tr>
-            <tr>
+          </tr>
+          <tr>
               <td style="border:1px solid #000;font-weight:bold;">ZONA:</td>
               <td style="border:1px solid #000;">${hoja1.zona||''}</td>
               <td style="border:1px solid #000;font-weight:bold;">RESPONSABLE:</td>
               <td style="border:1px solid #000;">${hoja1.responsable||''}</td>
-            </tr>
-            <tr>
+          </tr>
+          <tr>
               <td style="border:1px solid #000;font-weight:bold;">DEPARTAMENTO:</td>
               <td style="border:1px solid #000;">${hoja1.departamento||''}</td>
               <td style="border:1px solid #000;font-weight:bold;">FECHA EJECUCIÓN:</td>
@@ -687,17 +718,17 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
             <tr>
               <td style="border:1px solid #000;font-weight:bold;">DIRECCIÓN:</td>
               <td style="border:1px solid #000;" colspan="3">${hoja1.direccion||''}</td>
-            </tr>
-          </table>
+          </tr>
+        </table>
         </div>
         <div style="margin-top:8px;">
           <div style="background:#e30613;color:#fff;font-weight:bold;text-align:center;padding:2px 0;font-size:14px;border:1px solid #000;border-bottom:none;">AREAS COMUNES Y LOCATIVOS</div>
           <table style="width:100%;border-collapse:collapse;font-size:11px;">
-            <tr>
+          <tr>
               <th style="border:1px solid #000;background:#e30613;color:#fff;">ITEM</th>
               <th style="border:1px solid #000;background:#e30613;color:#fff;">¿SI/NO?</th>
               <th style="border:1px solid #000;background:#e30613;color:#fff;">DESCRIPCION/COMENTARIOS</th>
-            </tr>
+          </tr>
             ${(() => {
               const items = [
                 "HALLAZGOS EN LA TORRE, Pintura, Corrosión, Línea de vida (Evidenciar para SI)",
@@ -715,14 +746,14 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
                 "Se encuentran basuras, escombros dentro de la estación?"
               ];
               return items.map((item, i) => `
-                <tr>
+            <tr>
                   <td style='border:1px solid #000;'>${item}</td>
                   <td style='border:1px solid #000;text-align:center;'>${hoja1.items?.[i]?.respuesta||''}</td>
                   <td style='border:1px solid #000;'>${hoja1.items?.[i]?.descripcion||''}</td>
-                </tr>
+            </tr>
               `).join('');
             })()}
-          </table>
+        </table>
           <table style="width:100%;border-collapse:collapse;font-size:11px;">
             <tr>
               <td style="border:1px solid #000;font-weight:bold;">OBSERVACIONES GENERALES</td>
@@ -774,7 +805,7 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
             <div style="font-weight:bold;font-size:12px;">FIRMA FUNCIONARIO</div>
             <div style="height:40px;margin-bottom:4px;text-align:center;">
               ${hoja1.firma ? `<img src="${hoja1.firma}" style="max-height:38px;max-width:100%;border:1px solid #000;">` : ''}
-            </div>
+      </div>
           </div>
           <div style="width:50%;padding-left:24px;">
             <div style="font-weight:bold;font-size:12px;">NOMBRE</div>
@@ -803,30 +834,30 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
         <div style="margin:8px 0 0 0;">
           <div style="background:#e30613;color:#fff;font-weight:bold;text-align:center;padding:2px 0;font-size:14px;border:1px solid #000;border-bottom:none;">INFORMACION GENERAL</div>
           <table style="width:100%;border-collapse:collapse;font-size:12px;">
-            <tr>
+          <tr>
               <td style="border:1px solid #000;font-weight:bold;width:20%;">NOMBRE DE ESTACIÓN:</td>
               <td style="border:1px solid #000;width:30%;">${hoja1.nombreEstacion||''}</td>
               <td style="border:1px solid #000;font-weight:bold;width:20%;">REGIONAL:</td>
               <td style="border:1px solid #000;width:30%;">${hoja2.regional||''}</td>
-            </tr>
-            <tr>
+          </tr>
+          <tr>
               <td style="border:1px solid #000;font-weight:bold;">TIPO DE ESTACION:</td>
               <td style="border:1px solid #000;">${hoja2.tipoEstacion||''}</td>
               <td style="border:1px solid #000;font-weight:bold;">FECHA EJECUCIÓN:</td>
               <td style="border:1px solid #000;">${hoja2.fechaEjecucion||''}</td>
-            </tr>
-            <tr>
+          </tr>
+          <tr>
               <td style="border:1px solid #000;font-weight:bold;">TIPO DE SITIO (Propio, Arrendado):</td>
               <td style="border:1px solid #000;">${hoja2.tipoSitio||''}</td>
               <td style="border:1px solid #000;font-weight:bold;">FECHA FIN ACTIVIDAD:</td>
               <td style="border:1px solid #000;">${hoja2.fechaFinActividad||''}</td>
-            </tr>
-            <tr>
+          </tr>
+          <tr>
               <td style="border:1px solid #000;font-weight:bold;">TECNICO:</td>
               <td style="border:1px solid #000;">${hoja2.tecnico||''}</td>
               <td style="border:1px solid #000;font-weight:bold;">IMPLICA EXCLUSION?</td>
               <td style="border:1px solid #000;">${hoja2.exclusion||''}</td>
-            </tr>
+          </tr>
           </table>
         </div>
         <div style="margin-top:8px;">
@@ -862,34 +893,34 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
             <tr>
               <td style="border:1px solid #000;font-weight:bold;">DESCRIPCION DE LA SOLUCION</td>
               <td style="border:1px solid #000;" colspan="3">${hoja2.descripcionSolucion||''}</td>
-            </tr>
-          </table>
+          </tr>
+        </table>
         </div>
         <div style="margin-top:8px;">
           <div style="background:#e30613;color:#fff;font-weight:bold;text-align:center;padding:2px 0;font-size:14px;border:1px solid #000;border-bottom:none;">CAMBIO DE REPUESTOS Y/O PARTES (Para los casos que aplique)</div>
           <table style="width:100%;border-collapse:collapse;font-size:11px;">
-            <tr>
+          <tr>
               <th style="border:1px solid #000;">Descripción</th>
               <th style="border:1px solid #000;">Marca</th>
               <th style="border:1px solid #000;">Modelo</th>
               <th style="border:1px solid #000;">Serial</th>
-            </tr>
+          </tr>
             ${(() => {
               const reps = (hoja2.repuestos||[]).filter(r=>r.descripcion||r.marca||r.modelo||r.serial);
               if (reps.length > 0) {
                 return reps.map(rep=>`
-                  <tr>
+            <tr>
                     <td style="border:1px solid #000;height:32px;">${rep.descripcion||''}</td>
                     <td style="border:1px solid #000;height:32px;">${rep.marca||''}</td>
                     <td style="border:1px solid #000;height:32px;">${rep.modelo||''}</td>
                     <td style="border:1px solid #000;height:32px;">${rep.serial||''}</td>
-                  </tr>
+            </tr>
                 `).join('');
               } else {
                 return `<tr><td style='border:1px solid #000;height:32px;'>&nbsp;</td><td style='border:1px solid #000;height:32px;'>&nbsp;</td><td style='border:1px solid #000;height:32px;'>&nbsp;</td><td style='border:1px solid #000;height:32px;'>&nbsp;</td></tr>`;
               }
             })()}
-          </table>
+        </table>
         </div>
         <div style="margin-top:8px;">
           <div style="background:#e30613;color:#fff;font-weight:bold;text-align:center;padding:2px 0;font-size:14px;border:1px solid #000;border-bottom:none;">EVIDENCIA FOTOGRÁFICA DE LA ACTIVIDAD</div>
@@ -943,7 +974,7 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
               <td style="border:1px solid #000;height:24px;"><b>Descripción:</b> ${hoja2.evidencias?.[5]?.desc||''}</td>
             </tr>
           </table>
-        </div>
+      </div>
         <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;">
           <tr>
             <td style="border:1px solid #000;font-weight:bold;width:20%;">FALLA RESUELTA:</td>
