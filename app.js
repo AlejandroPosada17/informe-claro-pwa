@@ -561,6 +561,9 @@ function renderHoja2() {
 }
 
 function renderPrevisualizacion() {
+  // Forzar scroll al inicio ANTES de mostrar el loader y el contenido
+  window.scrollTo({top:0,behavior:'auto'});
+
   // Mostrar loader overlay en body INMEDIATAMENTE antes de cualquier renderizado
   let loaderOverlay = document.createElement('div');
   loaderOverlay.id = 'loader-overlay-pdf';
@@ -620,8 +623,6 @@ function renderPrevisualizacion() {
     <button id="editar">Editar datos</button>
     </div>
   `;
-  // Scroll al inicio de la página
-  window.scrollTo({top:0,behavior:'auto'});
 
   renderHtmlInstitucional(document.getElementById('canvas-container1'), datosHoja1, datosHoja2, 1);
   renderHtmlInstitucional(document.getElementById('canvas-container2'), datosHoja1, datosHoja2, 2);
