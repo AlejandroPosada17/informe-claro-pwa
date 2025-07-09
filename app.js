@@ -181,6 +181,8 @@ function renderHoja1() {
       <button type="submit">Siguiente</button>
     </form>
   `;
+  // Scroll al inicio del formulario
+  window.scrollTo({top:0,behavior:'auto'});
 
   // Tabla de ítems
   const items = [
@@ -458,6 +460,8 @@ function renderHoja2() {
       <button type="button" id="volver1">Volver</button>
     </form>
   `;
+  // Scroll al inicio del formulario
+  window.scrollTo({top:0,behavior:'auto'});
   // Repuestos: 4 filas fijas, sin agregar/eliminar
   let repuestos = datosHoja2.repuestos || [];
   while (repuestos.length < 4) repuestos.push({descripcion:'',marca:'',modelo:'',serial:''});
