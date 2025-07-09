@@ -616,6 +616,8 @@ function renderPrevisualizacion() {
     <button id="editar">Editar datos</button>
     </div>
   `;
+  // Scroll al inicio de la página
+  window.scrollTo({top:0,behavior:'auto'});
 
   renderHtmlInstitucional(document.getElementById('canvas-container1'), datosHoja1, datosHoja2, 1);
   renderHtmlInstitucional(document.getElementById('canvas-container2'), datosHoja1, datosHoja2, 2);
