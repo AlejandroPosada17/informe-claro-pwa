@@ -563,15 +563,7 @@ function renderPrevisualizacion() {
       <button id="btnPag1" class="active">Página 1</button>
       <button id="btnPag2">Página 2</button>
     </div>
-    <div class="previsualizacion-pdf" id="previsualizacion-pdf" style="position:relative;min-height:300px;">
-      <div id="loader-pdf" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;z-index:10;background:rgba(255,255,255,0.85);">
-        <div style="text-align:center;">
-          <div style="font-size:18px;font-weight:bold;margin-bottom:16px;">Generando previsualización...</div>
-          <div style="width:220px;height:16px;background:#eee;border-radius:8px;overflow:hidden;display:inline-block;">
-            <div id="loader-bar" style="height:100%;width:0%;background:#e30613;transition:width 0.3s;"></div>
-          </div>
-        </div>
-      </div>
+    <div class="previsualizacion-pdf" id="previsualizacion-pdf">
       <div id="canvas-container1" style="display:block;text-align:center;visibility:hidden;"></div>
       <div id="canvas-container2" style="display:none;text-align:center;visibility:hidden;"></div>
     </div>
@@ -581,25 +573,44 @@ function renderPrevisualizacion() {
     </div>
   `;
 
+  // Loader/progress bar overlay en toda la ventana
+  let loaderOverlay = document.createElement('div');
+  loaderOverlay.id = 'loader-overlay-pdf';
+  loaderOverlay.style.position = 'fixed';
+  loaderOverlay.style.top = '0';
+  loaderOverlay.style.left = '0';
+  loaderOverlay.style.width = '100vw';
+  loaderOverlay.style.height = '100vh';
+  loaderOverlay.style.display = 'flex';
+  loaderOverlay.style.alignItems = 'center';
+  loaderOverlay.style.justifyContent = 'center';
+  loaderOverlay.style.zIndex = '9999';
+  loaderOverlay.style.background = 'rgba(255,255,255,0.85)';
+  loaderOverlay.innerHTML = `
+    <div style="text-align:center;">
+      <div style="font-size:18px;font-weight:bold;margin-bottom:16px;">Generando previsualización...</div>
+      <div style="width:220px;height:16px;background:#eee;border-radius:8px;overflow:hidden;display:inline-block;">
+        <div id="loader-bar" style="height:100%;width:0%;background:#e30613;transition:width 0.3s;"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(loaderOverlay);
+
   // Loader/progress bar logic
-  let loaderBar = null;
+  let loaderBar = document.getElementById('loader-bar');
   let loaderInterval = null;
-  function startLoader() {
-    loaderBar = document.getElementById('loader-bar');
-    let progress = 0;
-    loaderBar.style.width = '0%';
-    loaderInterval = setInterval(() => {
-      progress += Math.random() * 10 + 5; // avance variable
-      if (progress > 90) progress = 90; // nunca llega al 100% hasta que termine
-      loaderBar.style.width = progress + '%';
-    }, 200);
-  }
+  let progress = 0;
+  loaderBar.style.width = '0%';
+  loaderInterval = setInterval(() => {
+    progress += Math.random() * 10 + 5;
+    if (progress > 90) progress = 90;
+    loaderBar.style.width = progress + '%';
+  }, 200);
   function finishLoader() {
     if (loaderInterval) clearInterval(loaderInterval);
     if (loaderBar) loaderBar.style.width = '100%';
     setTimeout(() => {
-      let loader = document.getElementById('loader-pdf');
-      if (loader) loader.style.display = 'none';
+      if (loaderOverlay && loaderOverlay.parentNode) loaderOverlay.parentNode.removeChild(loaderOverlay);
       document.getElementById('canvas-container1').style.visibility = 'visible';
       document.getElementById('canvas-container2').style.visibility = 'visible';
     }, 350);
@@ -607,8 +618,6 @@ function renderPrevisualizacion() {
 
   renderHtmlInstitucional(document.getElementById('canvas-container1'), datosHoja1, datosHoja2, 1);
   renderHtmlInstitucional(document.getElementById('canvas-container2'), datosHoja1, datosHoja2, 2);
-
-  startLoader();
 
   // Renderizar canvas para ambas páginas
   setTimeout(() => {
