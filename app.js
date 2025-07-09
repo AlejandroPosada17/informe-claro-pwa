@@ -563,7 +563,7 @@ function renderPrevisualizacion() {
       <button id="btnPag1" class="active">Página 1</button>
       <button id="btnPag2">Página 2</button>
     </div>
-    <div class="previsualizacion-pdf" id="previsualizacion-pdf">
+    <div class="previsualizacion-pdf" id="previsualizacion-pdf" style="visibility:hidden;">
       <div id="canvas-container1" style="display:block;text-align:center;"></div>
       <div id="canvas-container2" style="display:none;text-align:center;"></div>
     </div>
@@ -588,30 +588,30 @@ function renderPrevisualizacion() {
 
     html2canvas(tempDiv1, {backgroundColor: "#fff", useCORS: true}).then(c1 => {
       let cont1 = document.getElementById('canvas-container1');
-      // Eliminar canvas anterior si existe
       while (cont1.firstChild) cont1.removeChild(cont1.firstChild);
       c1.style.width = '100%';
       c1.style.height = 'auto';
       cont1.appendChild(c1);
       document.body.removeChild(tempDiv1);
-    });
 
-    // Página 2
-    let tempDiv2 = document.createElement('div');
-    tempDiv2.style.position = 'absolute';
-    tempDiv2.style.left = '-9999px';
-    tempDiv2.id = 'html-pagina2';
-    document.body.appendChild(tempDiv2);
-    renderHtmlInstitucional(tempDiv2, datosHoja1, datosHoja2, 2);
+      // Página 2
+      let tempDiv2 = document.createElement('div');
+      tempDiv2.style.position = 'absolute';
+      tempDiv2.style.left = '-9999px';
+      tempDiv2.id = 'html-pagina2';
+      document.body.appendChild(tempDiv2);
+      renderHtmlInstitucional(tempDiv2, datosHoja1, datosHoja2, 2);
 
-    html2canvas(tempDiv2, {backgroundColor: "#fff", useCORS: true}).then(c2 => {
-      let cont2 = document.getElementById('canvas-container2');
-      // Eliminar canvas anterior si existe
-      while (cont2.firstChild) cont2.removeChild(cont2.firstChild);
-      c2.style.width = '100%';
-      c2.style.height = 'auto';
-      cont2.appendChild(c2);
-      document.body.removeChild(tempDiv2);
+      html2canvas(tempDiv2, {backgroundColor: "#fff", useCORS: true}).then(c2 => {
+        let cont2 = document.getElementById('canvas-container2');
+        while (cont2.firstChild) cont2.removeChild(cont2.firstChild);
+        c2.style.width = '100%';
+        c2.style.height = 'auto';
+        cont2.appendChild(c2);
+        document.body.removeChild(tempDiv2);
+        // Mostrar la previsualización solo cuando ambos canvas están listos
+        document.getElementById('previsualizacion-pdf').style.visibility = 'visible';
+      });
     });
   }, 100);
 
