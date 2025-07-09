@@ -557,23 +557,7 @@ function renderHoja2() {
 }
 
 function renderPrevisualizacion() {
-  document.getElementById('app').innerHTML = `
-    <h2>Previsualización del informe</h2>
-    <div class="paginador">
-      <button id="btnPag1" class="active">Página 1</button>
-      <button id="btnPag2">Página 2</button>
-    </div>
-    <div class="previsualizacion-pdf" id="previsualizacion-pdf">
-      <div id="canvas-container1" style="display:block;text-align:center;visibility:hidden;"></div>
-      <div id="canvas-container2" style="display:none;text-align:center;visibility:hidden;"></div>
-    </div>
-    <div style="display:flex;justify-content:center;gap:16px;margin-top:16px;">
-    <button id="descargar">Descargar PDF</button>
-    <button id="editar">Editar datos</button>
-    </div>
-  `;
-
-  // Loader/progress bar overlay en toda la ventana
+  // Mostrar loader overlay en body INMEDIATAMENTE antes de cualquier renderizado
   let loaderOverlay = document.createElement('div');
   loaderOverlay.id = 'loader-overlay-pdf';
   loaderOverlay.style.position = 'fixed';
@@ -597,7 +581,7 @@ function renderPrevisualizacion() {
   document.body.appendChild(loaderOverlay);
 
   // Loader/progress bar logic
-  let loaderBar = document.getElementById('loader-bar');
+  let loaderBar = loaderOverlay.querySelector('#loader-bar');
   let loaderInterval = null;
   let progress = 0;
   loaderBar.style.width = '0%';
@@ -615,6 +599,23 @@ function renderPrevisualizacion() {
       document.getElementById('canvas-container2').style.visibility = 'visible';
     }, 350);
   }
+
+  // Ahora sí, renderizar el resto de la UI
+  document.getElementById('app').innerHTML = `
+    <h2>Previsualización del informe</h2>
+    <div class="paginador">
+      <button id="btnPag1" class="active">Página 1</button>
+      <button id="btnPag2">Página 2</button>
+    </div>
+    <div class="previsualizacion-pdf" id="previsualizacion-pdf">
+      <div id="canvas-container1" style="display:block;text-align:center;visibility:hidden;"></div>
+      <div id="canvas-container2" style="display:none;text-align:center;visibility:hidden;"></div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:16px;margin-top:16px;">
+    <button id="descargar">Descargar PDF</button>
+    <button id="editar">Editar datos</button>
+    </div>
+  `;
 
   renderHtmlInstitucional(document.getElementById('canvas-container1'), datosHoja1, datosHoja2, 1);
   renderHtmlInstitucional(document.getElementById('canvas-container2'), datosHoja1, datosHoja2, 2);
