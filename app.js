@@ -740,10 +740,10 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
               <th style="border:1px solid #000;">EVIDENCIA 2 (describir)</th>
             </tr>
             <tr>
-              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+              <td style="border:1px solid #000;height:240px;text-align:center;vertical-align:middle;">
                 ${hoja1.evidencias?.[0]?.img ? `<img src="${hoja1.evidencias[0].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
-              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+              <td style="border:1px solid #000;height:240px;text-align:center;vertical-align:middle;">
                 ${hoja1.evidencias?.[1]?.img ? `<img src="${hoja1.evidencias[1].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
             </tr>
@@ -756,10 +756,10 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
               <th style="border:1px solid #000;">EVIDENCIA 4 (describir)</th>
             </tr>
             <tr>
-              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+              <td style="border:1px solid #000;height:240px;text-align:center;vertical-align:middle;">
                 ${hoja1.evidencias?.[2]?.img ? `<img src="${hoja1.evidencias[2].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
-              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+              <td style="border:1px solid #000;height:240px;text-align:center;vertical-align:middle;">
                 ${hoja1.evidencias?.[3]?.img ? `<img src="${hoja1.evidencias[3].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
             </tr>
@@ -899,10 +899,10 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
               <th style="border:1px solid #000;">EVIDENCIA (RETIRO DEL CMTS ENCORTO)</th>
             </tr>
             <tr>
-              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+              <td style="border:1px solid #000;height:240px;text-align:center;vertical-align:middle;">
                 ${hoja2.evidencias?.[0]?.img ? `<img src="${hoja2.evidencias[0].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
-              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+              <td style="border:1px solid #000;height:240px;text-align:center;vertical-align:middle;">
                 ${hoja2.evidencias?.[1]?.img ? `<img src="${hoja2.evidencias[1].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
             </tr>
@@ -915,10 +915,10 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
               <th style="border:1px solid #000;">EVIDENCIA (CMTS ENPRODUCION)</th>
             </tr>
             <tr>
-              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+              <td style="border:1px solid #000;height:240px;text-align:center;vertical-align:middle;">
                 ${hoja2.evidencias?.[2]?.img ? `<img src="${hoja2.evidencias[2].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
-              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+              <td style="border:1px solid #000;height:240px;text-align:center;vertical-align:middle;">
                 ${hoja2.evidencias?.[3]?.img ? `<img src="${hoja2.evidencias[3].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
             </tr>
@@ -931,10 +931,10 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
               <th style="border:1px solid #000;">EVIDENCIA ADICIONAL</th>
             </tr>
             <tr>
-              <td style="border:1px solid #000;height:120px;text-align:center;vertical-align:middle;">
+              <td style="border:1px solid #000;height:160px;text-align:center;vertical-align:middle;">
                 ${hoja2.evidencias?.[4]?.img ? `<img src="${hoja2.evidencias[4].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
-              <td style="border:1px solid #000;height:120px;text-align:center;vertical-align:middle;">
+              <td style="border:1px solid #000;height:160px;text-align:center;vertical-align:middle;">
                 ${hoja2.evidencias?.[5]?.img ? `<img src="${hoja2.evidencias[5].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
             </tr>
@@ -981,11 +981,11 @@ function generarPDF(hoja1, hoja2, cb) {
   renderHtmlInstitucional(div2, hoja1, hoja2, 2);
 
   setTimeout(() => {
-    html2canvas(div1, {backgroundColor: "#fff", scale:2, useCORS: true}).then(canvas1 => {
-      html2canvas(div2, {backgroundColor: "#fff", scale:2, useCORS: true}).then(canvas2 => {
-        pdf.addImage(canvas1.toDataURL('image/jpeg',0.92), 'JPEG', 0, 0, 700, 990);
+    html2canvas(div1, {backgroundColor: "#fff", scale:3, useCORS: true}).then(canvas1 => {
+      html2canvas(div2, {backgroundColor: "#fff", scale:3, useCORS: true}).then(canvas2 => {
+        pdf.addImage(canvas1.toDataURL('image/jpeg',1.0), 'JPEG', 0, 0, 700, 990);
         pdf.addPage([700,990]);
-        pdf.addImage(canvas2.toDataURL('image/jpeg',0.92), 'JPEG', 0, 0, 700, 990);
+        pdf.addImage(canvas2.toDataURL('image/jpeg',1.0), 'JPEG', 0, 0, 700, 990);
         pdf.save('informe-claro.pdf');
         document.body.removeChild(div1);
         document.body.removeChild(div2);
