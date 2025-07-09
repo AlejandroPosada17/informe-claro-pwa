@@ -740,11 +740,11 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
               <th style="border:1px solid #000;">EVIDENCIA 2 (describir)</th>
             </tr>
             <tr>
-              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
-                ${hoja1.evidencias?.[0]?.img ? `<img src=\"${hoja1.evidencias[0].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+                ${hoja1.evidencias?.[0]?.img ? `<img src="${hoja1.evidencias[0].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
-              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
-                ${hoja1.evidencias?.[1]?.img ? `<img src=\"${hoja1.evidencias[1].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+                ${hoja1.evidencias?.[1]?.img ? `<img src="${hoja1.evidencias[1].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
             </tr>
             <tr>
@@ -756,11 +756,11 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
               <th style="border:1px solid #000;">EVIDENCIA 4 (describir)</th>
             </tr>
             <tr>
-              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
-                ${hoja1.evidencias?.[2]?.img ? `<img src=\"${hoja1.evidencias[2].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+                ${hoja1.evidencias?.[2]?.img ? `<img src="${hoja1.evidencias[2].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
-              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
-                ${hoja1.evidencias?.[3]?.img ? `<img src=\"${hoja1.evidencias[3].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+                ${hoja1.evidencias?.[3]?.img ? `<img src="${hoja1.evidencias[3].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
             </tr>
             <tr>
@@ -773,7 +773,7 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
           <div style="width:50%;">
             <div style="font-weight:bold;font-size:12px;">FIRMA FUNCIONARIO</div>
             <div style="height:40px;margin-bottom:4px;text-align:center;">
-              ${hoja1.firma ? `<img src=\"${hoja1.firma}\" style=\"max-height:38px;max-width:100%;border:1px solid #000;\">` : ''}
+              ${hoja1.firma ? `<img src="${hoja1.firma}" style="max-height:38px;max-width:100%;border:1px solid #000;">` : ''}
             </div>
           </div>
           <div style="width:50%;padding-left:24px;">
@@ -784,7 +784,7 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
           </div>
         </div>
       </div>
-      <div style=\"width:900px;text-align:center;margin:0 auto;font-size:11px;color:#000;\">Clasificación: Uso Interno. Documento Claro Colombia</div>
+      <div style="width:900px;text-align:center;margin:0 auto;font-size:11px;color:#000;">Clasificación: Uso Interno. Documento Claro Colombia</div>
     `;
   } else {
     // --- FORMATO INSTITUCIONAL PAGINA 2 ---
@@ -879,14 +879,14 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
               if (reps.length > 0) {
                 return reps.map(rep=>`
                   <tr>
-                    <td style=\"border:1px solid #000;height:32px;\">${rep.descripcion||''}</td>
-                    <td style=\"border:1px solid #000;height:32px;\">${rep.marca||''}</td>
-                    <td style=\"border:1px solid #000;height:32px;\">${rep.modelo||''}</td>
-                    <td style=\"border:1px solid #000;height:32px;\">${rep.serial||''}</td>
+                    <td style="border:1px solid #000;height:32px;">${rep.descripcion||''}</td>
+                    <td style="border:1px solid #000;height:32px;">${rep.marca||''}</td>
+                    <td style="border:1px solid #000;height:32px;">${rep.modelo||''}</td>
+                    <td style="border:1px solid #000;height:32px;">${rep.serial||''}</td>
                   </tr>
                 `).join('');
               } else {
-                return Array.from({length:4}).map(()=>`<tr><td style='border:1px solid #000;height:32px;'>&nbsp;</td><td style='border:1px solid #000;height:32px;'>&nbsp;</td><td style='border:1px solid #000;height:32px;'>&nbsp;</td><td style='border:1px solid #000;height:32px;'>&nbsp;</td></tr>`).join('');
+                return `<tr><td style='border:1px solid #000;height:32px;'>&nbsp;</td><td style='border:1px solid #000;height:32px;'>&nbsp;</td><td style='border:1px solid #000;height:32px;'>&nbsp;</td><td style='border:1px solid #000;height:32px;'>&nbsp;</td></tr>`;
               }
             })()}
           </table>
@@ -899,11 +899,11 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
               <th style="border:1px solid #000;">EVIDENCIA (RETIRO DEL CMTS ENCORTO)</th>
             </tr>
             <tr>
-              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
-                ${hoja2.evidencias?.[0]?.img ? `<img src=\"${hoja2.evidencias[0].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+                ${hoja2.evidencias?.[0]?.img ? `<img src="${hoja2.evidencias[0].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
-              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
-                ${hoja2.evidencias?.[1]?.img ? `<img src=\"${hoja2.evidencias[1].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+                ${hoja2.evidencias?.[1]?.img ? `<img src="${hoja2.evidencias[1].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
             </tr>
             <tr>
@@ -915,11 +915,11 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
               <th style="border:1px solid #000;">EVIDENCIA (CMTS ENPRODUCION)</th>
             </tr>
             <tr>
-              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
-                ${hoja2.evidencias?.[2]?.img ? `<img src=\"${hoja2.evidencias[2].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+                ${hoja2.evidencias?.[2]?.img ? `<img src="${hoja2.evidencias[2].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
-              <td style="border:1px solid #000;height:90px;text-align:center;vertical-align:middle;">
-                ${hoja2.evidencias?.[3]?.img ? `<img src=\"${hoja2.evidencias[3].img}\" style=\"max-width:100%;max-height:80px;\">` : ''}
+              <td style="border:1px solid #000;height:180px;text-align:center;vertical-align:middle;">
+                ${hoja2.evidencias?.[3]?.img ? `<img src="${hoja2.evidencias[3].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
             </tr>
             <tr>
@@ -931,11 +931,11 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
               <th style="border:1px solid #000;">EVIDENCIA ADICIONAL</th>
             </tr>
             <tr>
-              <td style="border:1px solid #000;height:60px;text-align:center;vertical-align:middle;">
-                ${hoja2.evidencias?.[4]?.img ? `<img src=\"${hoja2.evidencias[4].img}\" style=\"max-width:100%;max-height:50px;\">` : ''}
+              <td style="border:1px solid #000;height:120px;text-align:center;vertical-align:middle;">
+                ${hoja2.evidencias?.[4]?.img ? `<img src="${hoja2.evidencias[4].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
-              <td style="border:1px solid #000;height:60px;text-align:center;vertical-align:middle;">
-                ${hoja2.evidencias?.[5]?.img ? `<img src=\"${hoja2.evidencias[5].img}\" style=\"max-width:100%;max-height:50px;\">` : ''}
+              <td style="border:1px solid #000;height:120px;text-align:center;vertical-align:middle;">
+                ${hoja2.evidencias?.[5]?.img ? `<img src="${hoja2.evidencias[5].img}" style="max-width:95%;max-height:95%;object-fit:contain;">` : ''}
               </td>
             </tr>
             <tr>
@@ -957,7 +957,7 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
           </tr>
         </table>
       </div>
-      <div style=\"width:900px;text-align:center;margin:0 auto;font-size:11px;color:#000;\">Clasificación: Uso Interno. Documento Claro Colombia</div>
+      <div style="width:900px;text-align:center;margin:0 auto;font-size:11px;color:#000;">Clasificación: Uso Interno. Documento Claro Colombia</div>
     `;
   }
   divElem.innerHTML = html;
