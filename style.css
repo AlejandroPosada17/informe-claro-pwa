@@ -152,6 +152,17 @@ body {
   .evidencia-btns input[type="file"] {
     display: none;
   }
+  /* Mejora: ancho mínimo para columna ¿Sí/No? en tabla de áreas comunes y locativos */
+  #tabla-items td:nth-child(2), #tabla-items th:nth-child(2) {
+    min-width: 64px;
+    width: 80px;
+    text-align: center;
+  }
+  #tabla-items select {
+    min-width: 56px;
+    width: 100%;
+    box-sizing: border-box;
+  }
   @media (max-width: 600px) {
     #app { padding: 2px; }
     form { padding: 4px; }
