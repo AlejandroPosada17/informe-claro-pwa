@@ -137,20 +137,27 @@ function renderHoja1() {
     <form id="form1" novalidate>
       <img src="logo-claro.png" alt="Logo Claro" style="width:100px;display:block;margin:auto;">
       <h2>Estado General de Estación</h2>
-      <label>Nombre de estación*<span class="error-msg" id="err-nombreEstacion"></span></label>
+      <label>Nombre de estación*</label>
       <input name="nombreEstacion" required value="${datosHoja1.nombreEstacion||''}" />
-      <label>Categoría*<span class="error-msg" id="err-categoria"></span></label>
+      <div class="error-msg" id="err-nombreEstacion"></div>
+      <label>Categoría*</label>
       <input name="categoria" required value="${datosHoja1.categoria||''}" />
-      <label>Zona*<span class="error-msg" id="err-zona"></span></label>
+      <div class="error-msg" id="err-categoria"></div>
+      <label>Zona*</label>
       <input name="zona" required value="${datosHoja1.zona||''}" />
-      <label>Responsable*<span class="error-msg" id="err-responsable"></span></label>
+      <div class="error-msg" id="err-zona"></div>
+      <label>Responsable*</label>
       <input name="responsable" required value="${datosHoja1.responsable||''}" />
-      <label>Departamento*<span class="error-msg" id="err-departamento"></span></label>
+      <div class="error-msg" id="err-responsable"></div>
+      <label>Departamento*</label>
       <input name="departamento" required value="${datosHoja1.departamento||''}" />
-      <label>Fecha de ejecución*<span class="error-msg" id="err-fechaEjecucion"></span></label>
+      <div class="error-msg" id="err-departamento"></div>
+      <label>Fecha de ejecución*</label>
       <input name="fechaEjecucion" type="date" required value="${datosHoja1.fechaEjecucion||''}" />
-      <label>Dirección*<span class="error-msg" id="err-direccion"></span></label>
+      <div class="error-msg" id="err-fechaEjecucion"></div>
+      <label>Dirección*</label>
       <input name="direccion" required value="${datosHoja1.direccion||''}" />
+      <div class="error-msg" id="err-direccion"></div>
       <hr>
       <label>Áreas comunes y locativos</label>
       <table>
@@ -163,28 +170,29 @@ function renderHoja1() {
         </thead>
         <tbody id="tabla-items"></tbody>
       </table>
-      <span class="error-msg" id="err-items"></span>
+      <hr>
       <label>Observaciones generales</label>
       <textarea name="observaciones">${datosHoja1.observaciones||''}</textarea>
       <hr>
       <label>Evidencias fotográficas</label>
       <div id="evidencias1"></div>
       <hr>
-      <label>Firma del funcionario*<span class="error-msg" id="err-firma"></span></label>
+      <label>Firma del funcionario*</label>
       <div>
         <canvas id="firma1" width="300" height="80"></canvas>
         <button type="button" id="limpiarFirma1">Limpiar firma</button>
       </div>
-      <label>Nombre*<span class="error-msg" id="err-nombreFuncionario"></span></label>
+      <div class="error-msg" id="err-firma"></div>
+      <label>Nombre*</label>
       <input name="nombreFuncionario" required value="${datosHoja1.nombreFuncionario||''}" />
-      <label>Fecha elaboración informe*<span class="error-msg" id="err-fechaElaboracion"></span></label>
+      <div class="error-msg" id="err-nombreFuncionario"></div>
+      <label>Fecha elaboración informe*</label>
       <input name="fechaElaboracion" type="date" required value="${datosHoja1.fechaElaboracion||''}" />
+      <div class="error-msg" id="err-fechaElaboracion"></div>
       <button type="submit">Siguiente</button>
     </form>
   `;
-  // Scroll al inicio del formulario
   window.scrollTo({top:0,behavior:'auto'});
-
   // Tabla de ítems
   const items = [
     "HALLAZGOS EN LA TORRE, Pintura, Corrosión, Línea de vida (Evidenciar para SI)",
@@ -211,7 +219,9 @@ function renderHoja1() {
           <option value="">-</option>
           <option${itemsGuardados[i]?.respuesta==='SÍ'?' selected':''}>SÍ</option>
           <option${itemsGuardados[i]?.respuesta==='NO'?' selected':''}>NO</option>
+          <option${itemsGuardados[i]?.respuesta==='NC'?' selected':''}>NC</option>
         </select>
+        <div class="error-msg" id="err-item${i}"></div>
       </td>
       <td>
         <input name="descItem${i}" value="${itemsGuardados[i]?.descripcion||''}" />
@@ -329,15 +339,58 @@ function renderHoja1() {
   function mostrarError(id, msg) {
     const el = document.getElementById(id);
     if (el) { el.textContent = msg; el.style.color = '#e30613'; el.style.fontSize = '0.95em'; }
+    // resalta el campo
+    if (id.startsWith('err-item')) {
+      const idx = parseInt(id.replace('err-item',''));
+      const sel = document.querySelector(`select[name="item${idx}"]`);
+      if (sel) sel.classList.add('input-error');
+    } else {
+      const map = {
+        'err-nombreEstacion': 'input[name="nombreEstacion"]',
+        'err-categoria': 'input[name="categoria"]',
+        'err-zona': 'input[name="zona"]',
+        'err-responsable': 'input[name="responsable"]',
+        'err-departamento': 'input[name="departamento"]',
+        'err-fechaEjecucion': 'input[name="fechaEjecucion"]',
+        'err-direccion': 'input[name="direccion"]',
+        'err-nombreFuncionario': 'input[name="nombreFuncionario"]',
+        'err-fechaElaboracion': 'input[name="fechaElaboracion"]'
+      };
+      if (map[id]) {
+        const inp = document.querySelector(map[id]);
+        if (inp) inp.classList.add('input-error');
+      }
+    }
   }
   function limpiarError(id) {
     const el = document.getElementById(id);
     if (el) el.textContent = '';
+    // quita el borde rojo
+    if (id.startsWith('err-item')) {
+      const idx = parseInt(id.replace('err-item',''));
+      const sel = document.querySelector(`select[name="item${idx}"]`);
+      if (sel) sel.classList.remove('input-error');
+    } else {
+      const map = {
+        'err-nombreEstacion': 'input[name="nombreEstacion"]',
+        'err-categoria': 'input[name="categoria"]',
+        'err-zona': 'input[name="zona"]',
+        'err-responsable': 'input[name="responsable"]',
+        'err-departamento': 'input[name="departamento"]',
+        'err-fechaEjecucion': 'input[name="fechaEjecucion"]',
+        'err-direccion': 'input[name="direccion"]',
+        'err-nombreFuncionario': 'input[name="nombreFuncionario"]',
+        'err-fechaElaboracion': 'input[name="fechaElaboracion"]'
+      };
+      if (map[id]) {
+        const inp = document.querySelector(map[id]);
+        if (inp) inp.classList.remove('input-error');
+      }
+    }
   }
   function validarCamposHoja1() {
     let fd = new FormData(document.getElementById('form1'));
     let errores = [];
-    // Validar cada campo requerido
     if (!fd.get('nombreEstacion') || fd.get('nombreEstacion').trim() === '') { mostrarError('err-nombreEstacion','Por favor, ingresa el nombre de la estación'); errores.push('nombreEstacion'); } else limpiarError('err-nombreEstacion');
     if (!fd.get('categoria') || fd.get('categoria').trim() === '') { mostrarError('err-categoria','Selecciona la categoría'); errores.push('categoria'); } else limpiarError('err-categoria');
     if (!fd.get('zona') || fd.get('zona').trim() === '') { mostrarError('err-zona','Ingresa la zona'); errores.push('zona'); } else limpiarError('err-zona');
@@ -345,12 +398,15 @@ function renderHoja1() {
     if (!fd.get('departamento') || fd.get('departamento').trim() === '') { mostrarError('err-departamento','Ingresa el departamento'); errores.push('departamento'); } else limpiarError('err-departamento');
     if (!fd.get('fechaEjecucion') || fd.get('fechaEjecucion').trim() === '') { mostrarError('err-fechaEjecucion','Ingresa la fecha de ejecución'); errores.push('fechaEjecucion'); } else limpiarError('err-fechaEjecucion');
     if (!fd.get('direccion') || fd.get('direccion').trim() === '') { mostrarError('err-direccion','Ingresa la dirección'); errores.push('direccion'); } else limpiarError('err-direccion');
-    // Validar items
-    let itemsOk = true;
+    // Validar items uno a uno
     for (let i = 0; i < 13; i++) {
-      if (!fd.get(`item${i}`) || fd.get(`item${i}`).trim() === '') itemsOk = false;
+      if (!fd.get(`item${i}`) || fd.get(`item${i}`).trim() === '') {
+        mostrarError(`err-item${i}`,`Selecciona una opción para el ítem ${i+1}`);
+        errores.push(`item${i}`);
+      } else {
+        limpiarError(`err-item${i}`);
+      }
     }
-    if (!itemsOk) { mostrarError('err-items','Responde todos los ítems de áreas comunes y locativos'); errores.push('items'); } else limpiarError('err-items');
     // Validar firma
     if (!firmas[0]) { mostrarError('err-firma','Por favor, firma el informe'); errores.push('firma'); } else limpiarError('err-firma');
     if (!fd.get('nombreFuncionario') || fd.get('nombreFuncionario').trim() === '') { mostrarError('err-nombreFuncionario','Ingresa el nombre del funcionario'); errores.push('nombreFuncionario'); } else limpiarError('err-nombreFuncionario');
@@ -372,7 +428,7 @@ function renderHoja1() {
         case 'fechaElaboracion': limpiarError('err-fechaElaboracion'); break;
         default: break;
       }
-      if (el.name && el.name.startsWith('item')) limpiarError('err-items');
+      if (el.name && el.name.startsWith('item')) limpiarError(`err-${el.name}`);
     };
   });
   // Submit
