@@ -283,7 +283,7 @@ function renderHoja1() {
   }
   let drawing = false;
   canvas.onmousedown = e => { drawing = true; ctx.beginPath(); };
-  canvas.onmouseup = e => { drawing = false; firmas[0] = canvas.toDataURL(); datosHoja1.firma = firmas[0]; guardarLocal(); limpiarError('err-firma'); };
+  canvas.onmouseup = e => { drawing = false; firmas[0] = canvas.toDataURL(); datosHoja1.firma = firmas[0]; guardarLocal(); };
   canvas.onmousemove = e => {
     if (!drawing) return;
     let rect = canvas.getBoundingClientRect();
@@ -297,7 +297,7 @@ function renderHoja1() {
   };
   // Touch
   canvas.addEventListener('touchstart', e => { drawing = true; ctx.beginPath(); });
-  canvas.addEventListener('touchend', e => { drawing = false; firmas[0] = canvas.toDataURL(); datosHoja1.firma = firmas[0]; guardarLocal(); limpiarError('err-firma'); });
+  canvas.addEventListener('touchend', e => { drawing = false; firmas[0] = canvas.toDataURL(); datosHoja1.firma = firmas[0]; guardarLocal(); });
   canvas.addEventListener('touchmove', e => {
     if (!drawing) return;
     let rect = canvas.getBoundingClientRect();
