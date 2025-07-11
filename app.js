@@ -493,7 +493,7 @@ function renderHoja1() {
     }
     datosHoja1.firma = firmas[0];
     guardarLocal();
-    renderHoja2();
+      renderHoja2();
   };
 }
 
@@ -816,7 +816,7 @@ function renderHoja2() {
       });
     }
     guardarLocal();
-    renderPrevisualizacion();
+      renderPrevisualizacion();
   };
   document.getElementById('volver1').onclick = renderHoja1;
 }
@@ -949,8 +949,6 @@ function renderPrevisualizacion() {
         evidencias2 = [null, null, null, null, null, null];
         firmas = [null];
         renderHoja1();
-        // Mostrar modal de éxito
-        mostrarModalExitoPDF();
       }, 1000);
     });
   };
@@ -1314,35 +1312,12 @@ function generarPDF(hoja1, hoja2, cb) {
           if (!modalMostrado) {
             modalMostrado = true;
             window.removeEventListener('focus', onFocus);
-            if (cb) cb();
+        if (cb) cb();
           }
         }, 2000);
       });
     });
   }, 500);
-}
-
-// Modal de éxito PDF
-function mostrarModalExitoPDF() {
-  let modal = document.createElement('div');
-  modal.style.position = 'fixed';
-  modal.style.top = 0;
-  modal.style.left = 0;
-  modal.style.width = '100vw';
-  modal.style.height = '100vh';
-  modal.style.background = 'rgba(0,0,0,0.35)';
-  modal.style.display = 'flex';
-  modal.style.alignItems = 'center';
-  modal.style.justifyContent = 'center';
-  modal.style.zIndex = 99999;
-  modal.innerHTML = `<div style="background:#fff;padding:32px 24px;border-radius:12px;box-shadow:0 2px 16px #0003;text-align:center;max-width:90vw;">
-    <div style="font-size:1.2em;font-weight:bold;margin-bottom:16px;color:#222;">El PDF se descargó con éxito</div>
-    <button id="cerrar-modal-exito" style="background:#e30613;color:#fff;border:none;padding:8px 24px;border-radius:6px;font-size:1em;cursor:pointer;">Aceptar</button>
-  </div>`;
-  document.body.appendChild(modal);
-  document.getElementById('cerrar-modal-exito').onclick = () => {
-    document.body.removeChild(modal);
-  };
 }
 
 // --- Flujo de inicio seguro ---
