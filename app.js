@@ -638,9 +638,25 @@ function renderHoja2() {
 
   // Evidencias
   let evHtml = '';
+  const evidenciasLabels = [
+    'EVIDENCIA DE LA FALLA (CMTS EN CORTO)',
+    'EVIDENCIA (RETIRO DEL CMTS ENCORTO)',
+    'EVIDENCIA (INSTALACION NUEVO CMTS)',
+    'EVIDENCIA (CMTS ENPRODUCION)',
+    'EVIDENCIA ADICIONAL 1',
+    'EVIDENCIA ADICIONAL 2'
+  ];
+  const evidenciasPlaceholders = [
+    'Descripción EVIDENCIA DE LA FALLA (CMTS EN CORTO)',
+    'Descripción EVIDENCIA (RETIRO DEL CMTS ENCORTO)',
+    'Descripción EVIDENCIA (INSTALACION NUEVO CMTS)',
+    'Descripción EVIDENCIA (CMTS ENPRODUCION)',
+    'Descripción EVIDENCIA ADICIONAL 1',
+    'Descripción EVIDENCIA ADICIONAL 2'
+  ];
   for (let i = 0; i < 6; i++) {
     evHtml += `
-      <label>Evidencia ${i+1}</label>
+      <label>${evidenciasLabels[i]}</label>
       <div class="evidencia-btns">
         <button type="button" id="tomarfoto2_${i}">Tomar foto</button>
         <input type="file" accept="image/*" capture="environment" id="filecam2_${i}" style="display:none;" />
@@ -648,7 +664,7 @@ function renderHoja2() {
         <input type="file" accept="image/*" id="filegal2_${i}" style="display:none;" />
       </div>
       <img id="prev2_${i}" class="preview" style="display:${evidencias2[i]?'block':'none'}" src="${evidencias2[i]||''}"/>
-      <input id="desc2_${i}" placeholder="Descripción evidencia ${i+1}" value="${datosHoja2.evidencias?.[i]?.desc||''}" />
+      <input id="desc2_${i}" placeholder="${evidenciasPlaceholders[i]}" value="${datosHoja2.evidencias?.[i]?.desc||''}" />
     `;
   }
   document.getElementById('evidencias2').innerHTML = evHtml;
