@@ -1296,15 +1296,27 @@ function generarPDF(hoja1, hoja2, cb) {
         pdf.addImage(canvas1.toDataURL('image/jpeg',1.0), 'JPEG', 0, 0, 700, 990);
         pdf.addPage([700,990]);
         pdf.addImage(canvas2.toDataURL('image/jpeg',1.0), 'JPEG', 0, 0, 700, 990);
-        // Guardar PDF con nombre personalizado
         let nombreEstacion = hoja1.nombreEstacion || '';
+        let modalMostrado = false;
+        function onFocus() {
+          if (!modalMostrado) {
+            modalMostrado = true;
+            window.removeEventListener('focus', onFocus);
+            if (cb) cb();
+          }
+        }
+        window.addEventListener('focus', onFocus);
         pdf.save('Informe Tecnico Exclusion ' + nombreEstacion + '.pdf');
         document.body.removeChild(div1);
         document.body.removeChild(div2);
-        // Espera un poco para asegurar que la descarga se inicie antes de mostrar el modal
+        // Si el usuario no cambia de ventana (descarga automática), muestra el modal tras 2 segundos como fallback
         setTimeout(() => {
-          if (cb) cb();
-        }, 500);
+          if (!modalMostrado) {
+            modalMostrado = true;
+            window.removeEventListener('focus', onFocus);
+            if (cb) cb();
+          }
+        }, 2000);
       });
     });
   }, 500);
