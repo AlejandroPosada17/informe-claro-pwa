@@ -154,9 +154,12 @@ body {
   }
   /* Mejora: ancho mínimo para columna ¿Sí/No? en tabla de áreas comunes y locativos */
   #tabla-items td:nth-child(2), #tabla-items th:nth-child(2) {
-    min-width: 64px;
-    width: 80px;
+    min-width: 120px;
+    width: 120px;
     text-align: center;
+    vertical-align: middle;
+    padding-left: 0;
+    padding-right: 0;
   }
   #tabla-items select {
     min-width: 56px;
@@ -178,12 +181,35 @@ body {
     text-align: center;
     padding-top: 8px;
     padding-bottom: 8px;
+    padding-left: 0;
+    padding-right: 0;
   }
   #tabla-items td:first-child, #tabla-items th:first-child {
     text-align: left;
     vertical-align: middle;
     width: 48%;
     min-width: 120px;
+  }
+  #tabla-items td:nth-child(2) {
+    /* Quitar display:block/flex y dejar como celda normal */
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 0;
+    padding-right: 0;
+    vertical-align: middle;
+    text-align: center;
+  }
+  #tabla-items td:nth-child(2) select {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 0;
+  }
+  #tabla-items td:nth-child(2) .error-msg {
+    margin-top: 2px;
+    margin-bottom: 0;
+    min-height: 0;
+    width: 100%;
+    text-align: left;
   }
   #tabla-items td:nth-child(2), #tabla-items th:nth-child(2) {
     min-width: 64px;
@@ -203,6 +229,13 @@ body {
     height: 36px;
     font-size: 1em;
     box-sizing: border-box;
+  }
+  #tabla-items td:last-child input {
+    width: 98%;
+    min-width: 120px;
+    height: 40px;
+    font-size: 1.05em;
+    padding: 6px 8px;
   }
   @media (max-width: 600px) {
     #app { padding: 2px; }
