@@ -173,6 +173,37 @@ body {
     margin: 2px 0 8px 0;
     min-height: 18px;
   }
+  #tabla-items td, #tabla-items th {
+    vertical-align: middle;
+    text-align: center;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  #tabla-items td:first-child, #tabla-items th:first-child {
+    text-align: left;
+    vertical-align: middle;
+    width: 48%;
+    min-width: 120px;
+  }
+  #tabla-items td:nth-child(2), #tabla-items th:nth-child(2) {
+    min-width: 64px;
+    width: 80px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  #tabla-items td:last-child, #tabla-items th:last-child {
+    min-width: 80px;
+    width: 30%;
+    text-align: center;
+    vertical-align: middle;
+  }
+  #tabla-items select, #tabla-items input {
+    margin: 0;
+    vertical-align: middle;
+    height: 36px;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
   @media (max-width: 600px) {
     #app { padding: 2px; }
     form { padding: 4px; }
