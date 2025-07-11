@@ -318,11 +318,12 @@ function renderHoja1() {
     guardarLocal();
     mostrarError('err-firma','Por favor, firma el informe');
   };
-  // Mueve el error justo debajo del canvas
+  // Mueve el error justo debajo del canvas (antes del botón)
   let firmaDiv = canvas.parentNode;
   let errFirma = document.getElementById('err-firma');
-  if (firmaDiv && errFirma) {
-    firmaDiv.appendChild(errFirma);
+  let btnLimpiar = document.getElementById('limpiarFirma1');
+  if (firmaDiv && errFirma && btnLimpiar) {
+    firmaDiv.insertBefore(errFirma, btnLimpiar);
   }
 
   // Guardado en cada cambio
@@ -500,9 +501,10 @@ function renderHoja2() {
   document.getElementById('app').innerHTML = `
     <form id="form2" novalidate>
       <h2>Actividad Técnica en Estación</h2>
-      <label>Regional*<span class="error-msg" id="err2-regional"></span></label>
+      <label>Regional*</label>
       <input name="regional" required value="${datosHoja2.regional||''}" />
-      <label>Tipo de estación*<span class="error-msg" id="err2-tipoEstacion"></span></label>
+      <div class="error-msg" id="err2-regional"></div>
+      <label>Tipo de estación*</label>
       <select name="tipoEstacion" required>
         <option value="">Tipo de estación</option>
         <option${datosHoja2.tipoEstacion==='TORRE CUADRADA'?' selected':''}>TORRE CUADRADA</option>
@@ -513,31 +515,38 @@ function renderHoja2() {
         <option${datosHoja2.tipoEstacion==='INDOOR'?' selected':''}>INDOOR</option>
         <option${datosHoja2.tipoEstacion==='VALLA'?' selected':''}>VALLA</option>
       </select>
-      <label>Fecha ejecución*<span class="error-msg" id="err2-fechaEjecucion"></span></label>
+      <div class="error-msg" id="err2-tipoEstacion"></div>
+      <label>Fecha ejecución*</label>
       <input name="fechaEjecucion" type="date" required value="${datosHoja2.fechaEjecucion||''}" />
-      <label>Tipo de sitio*<span class="error-msg" id="err2-tipoSitio"></span></label>
+      <div class="error-msg" id="err2-fechaEjecucion"></div>
+      <label>Tipo de sitio*</label>
       <select name="tipoSitio" required>
         <option value="">Tipo de sitio</option>
         <option${datosHoja2.tipoSitio==='PROPIO'?' selected':''}>PROPIO</option>
         <option${datosHoja2.tipoSitio==='ARRENDADO'?' selected':''}>ARRENDADO</option>
       </select>
-      <label>Fecha fin de actividad*<span class="error-msg" id="err2-fechaFinActividad"></span></label>
+      <div class="error-msg" id="err2-tipoSitio"></div>
+      <label>Fecha fin de actividad*</label>
       <input name="fechaFinActividad" type="date" required value="${datosHoja2.fechaFinActividad||''}" />
-      <label>Técnico*<span class="error-msg" id="err2-tecnico"></span></label>
+      <div class="error-msg" id="err2-fechaFinActividad"></div>
+      <label>Técnico*</label>
       <input name="tecnico" required value="${datosHoja2.tecnico||''}" />
-      <label>¿Implica exclusión?*<span class="error-msg" id="err2-exclusion"></span></label>
+      <div class="error-msg" id="err2-tecnico"></div>
+      <label>¿Implica exclusión?*</label>
       <select name="exclusion" required>
         <option value="">¿Implica exclusión?</option>
         <option${datosHoja2.exclusion==='SÍ'?' selected':''}>SÍ</option>
         <option${datosHoja2.exclusion==='NO'?' selected':''}>NO</option>
       </select>
-      <label>Tipo de actividad*<span class="error-msg" id="err2-tipoActividad"></span></label>
+      <div class="error-msg" id="err2-exclusion"></div>
+      <label>Tipo de actividad*</label>
       <select name="tipoActividad" required>
         <option value="">Tipo de actividad</option>
         <option${datosHoja2.tipoActividad==='EMERGENCIA'?' selected':''}>EMERGENCIA</option>
         <option${datosHoja2.tipoActividad==='CORRECTIVO'?' selected':''}>CORRECTIVO</option>
       </select>
-      <label>Tipo de equipo en falla*<span class="error-msg" id="err2-tipoEquipoFalla"></span></label>
+      <div class="error-msg" id="err2-tipoActividad"></div>
+      <label>Tipo de equipo en falla*</label>
       <select name="tipoEquipoFalla" required>
         <option value="">Tipo de equipo en falla</option>
         <option${datosHoja2.tipoEquipoFalla==='TX'?' selected':''}>TX</option>
@@ -547,28 +556,32 @@ function renderHoja2() {
         <option${datosHoja2.tipoEquipoFalla==='HURTO'?' selected':''}>HURTO</option>
         <option${datosHoja2.tipoEquipoFalla==='CLIMATICOS'?' selected':''}>CLIMATICOS</option>
       </select>
+      <div class="error-msg" id="err2-tipoEquipoFalla"></div>
       <label>Marca</label>
       <input name="marca" value="${datosHoja2.marca||''}" />
       <label>Modelo</label>
       <input name="modelo" value="${datosHoja2.modelo||''}" />
-      <label>¿Presenta afectación de servicios?*<span class="error-msg" id="err2-afectacionServicios"></span></label>
+      <label>¿Presenta afectación de servicios?*</label>
       <select name="afectacionServicios" required>
         <option value="">¿Presenta afectación de servicios?</option>
         <option${datosHoja2.afectacionServicios==='SÍ'?' selected':''}>SÍ</option>
         <option${datosHoja2.afectacionServicios==='NO'?' selected':''}>NO</option>
       </select>
-      <label>¿Cambio?*<span class="error-msg" id="err2-cambio"></span></label>
+      <div class="error-msg" id="err2-afectacionServicios"></div>
+      <label>¿Cambio?*</label>
       <select name="cambio" required>
         <option value="">¿Cambio?</option>
         <option${datosHoja2.cambio==='SÍ'?' selected':''}>SÍ</option>
         <option${datosHoja2.cambio==='NO'?' selected':''}>NO</option>
       </select>
-      <label>¿Instalación?*<span class="error-msg" id="err2-instalacion"></span></label>
+      <div class="error-msg" id="err2-cambio"></div>
+      <label>¿Instalación?*</label>
       <select name="instalacion" required>
         <option value="">¿Instalación?</option>
         <option${datosHoja2.instalacion==='SÍ'?' selected':''}>SÍ</option>
         <option${datosHoja2.instalacion==='NO'?' selected':''}>NO</option>
       </select>
+      <div class="error-msg" id="err2-instalacion"></div>
       <label>Descripción de la falla</label>
       <textarea name="descripcionFalla">${datosHoja2.descripcionFalla||''}</textarea>
       <label>Descripción de la solución</label>
@@ -589,19 +602,19 @@ function renderHoja2() {
       <hr>
       <label>Evidencias fotográficas</label>
       <div id="evidencias2"></div>
-      <label>¿Falla resuelta?*<span class="error-msg" id="err2-fallaResuelta"></span></label>
+      <label>¿Falla resuelta?*</label>
       <select name="fallaResuelta" required>
         <option value="">¿Falla resuelta?</option>
         <option${datosHoja2.fallaResuelta==='SÍ'?' selected':''}>SÍ</option>
         <option${datosHoja2.fallaResuelta==='NO'?' selected':''}>NO</option>
       </select>
+      <div class="error-msg" id="err2-fallaResuelta"></div>
       <label>Observaciones de la actividad</label>
       <textarea name="observacionesActividad">${datosHoja2.observacionesActividad||''}</textarea>
       <button type="submit">Generar PDF</button>
       <button type="button" id="volver1">Volver</button>
     </form>
   `;
-  // Scroll al inicio del formulario
   window.scrollTo({top:0,behavior:'auto'});
   // Repuestos: 4 filas fijas, sin agregar/eliminar
   let repuestos = datosHoja2.repuestos || [];
@@ -681,10 +694,50 @@ function renderHoja2() {
   function mostrarError2(id, msg) {
     const el = document.getElementById(id);
     if (el) { el.textContent = msg; el.style.color = '#e30613'; el.style.fontSize = '0.95em'; }
+    // resalta el campo
+    const map = {
+      'err2-regional': 'input[name="regional"]',
+      'err2-tipoEstacion': 'select[name="tipoEstacion"]',
+      'err2-fechaEjecucion': 'input[name="fechaEjecucion"]',
+      'err2-tipoSitio': 'select[name="tipoSitio"]',
+      'err2-fechaFinActividad': 'input[name="fechaFinActividad"]',
+      'err2-tecnico': 'input[name="tecnico"]',
+      'err2-exclusion': 'select[name="exclusion"]',
+      'err2-tipoActividad': 'select[name="tipoActividad"]',
+      'err2-tipoEquipoFalla': 'select[name="tipoEquipoFalla"]',
+      'err2-afectacionServicios': 'select[name="afectacionServicios"]',
+      'err2-cambio': 'select[name="cambio"]',
+      'err2-instalacion': 'select[name="instalacion"]',
+      'err2-fallaResuelta': 'select[name="fallaResuelta"]'
+    };
+    if (map[id]) {
+      const inp = document.querySelector(map[id]);
+      if (inp) inp.classList.add('input-error');
+    }
   }
   function limpiarError2(id) {
     const el = document.getElementById(id);
     if (el) el.textContent = '';
+    // quita el borde rojo
+    const map = {
+      'err2-regional': 'input[name="regional"]',
+      'err2-tipoEstacion': 'select[name="tipoEstacion"]',
+      'err2-fechaEjecucion': 'input[name="fechaEjecucion"]',
+      'err2-tipoSitio': 'select[name="tipoSitio"]',
+      'err2-fechaFinActividad': 'input[name="fechaFinActividad"]',
+      'err2-tecnico': 'input[name="tecnico"]',
+      'err2-exclusion': 'select[name="exclusion"]',
+      'err2-tipoActividad': 'select[name="tipoActividad"]',
+      'err2-tipoEquipoFalla': 'select[name="tipoEquipoFalla"]',
+      'err2-afectacionServicios': 'select[name="afectacionServicios"]',
+      'err2-cambio': 'select[name="cambio"]',
+      'err2-instalacion': 'select[name="instalacion"]',
+      'err2-fallaResuelta': 'select[name="fallaResuelta"]'
+    };
+    if (map[id]) {
+      const inp = document.querySelector(map[id]);
+      if (inp) inp.classList.remove('input-error');
+    }
   }
   function validarCamposHoja2() {
     let fd = new FormData(document.getElementById('form2'));
@@ -746,7 +799,10 @@ function renderHoja2() {
         case 'fallaResuelta': focusEl = document.querySelector('select[name="fallaResuelta"]'); break;
         default: break;
       }
-      if (focusEl) focusEl.focus();
+      if (focusEl) {
+        focusEl.focus();
+        focusEl.scrollIntoView({behavior:'smooth',block:'center'});
+      }
       return;
     }
     const fd = new FormData(e.target);
