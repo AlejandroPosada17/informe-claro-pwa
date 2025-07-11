@@ -134,22 +134,22 @@ function abrirCamara(callback) {
 // --- Renderiza la pantalla inicial ---
 function renderHoja1() {
   document.getElementById('app').innerHTML = `
-    <form id="form1">
+    <form id="form1" novalidate>
       <img src="logo-claro.png" alt="Logo Claro" style="width:100px;display:block;margin:auto;">
       <h2>Estado General de Estación</h2>
-      <label>Nombre de estación*</label>
+      <label>Nombre de estación*<span class="error-msg" id="err-nombreEstacion"></span></label>
       <input name="nombreEstacion" required value="${datosHoja1.nombreEstacion||''}" />
-      <label>Categoría*</label>
+      <label>Categoría*<span class="error-msg" id="err-categoria"></span></label>
       <input name="categoria" required value="${datosHoja1.categoria||''}" />
-      <label>Zona*</label>
+      <label>Zona*<span class="error-msg" id="err-zona"></span></label>
       <input name="zona" required value="${datosHoja1.zona||''}" />
-      <label>Responsable*</label>
+      <label>Responsable*<span class="error-msg" id="err-responsable"></span></label>
       <input name="responsable" required value="${datosHoja1.responsable||''}" />
-      <label>Departamento*</label>
+      <label>Departamento*<span class="error-msg" id="err-departamento"></span></label>
       <input name="departamento" required value="${datosHoja1.departamento||''}" />
-      <label>Fecha de ejecución*</label>
+      <label>Fecha de ejecución*<span class="error-msg" id="err-fechaEjecucion"></span></label>
       <input name="fechaEjecucion" type="date" required value="${datosHoja1.fechaEjecucion||''}" />
-      <label>Dirección*</label>
+      <label>Dirección*<span class="error-msg" id="err-direccion"></span></label>
       <input name="direccion" required value="${datosHoja1.direccion||''}" />
       <hr>
       <label>Áreas comunes y locativos</label>
@@ -163,20 +163,21 @@ function renderHoja1() {
         </thead>
         <tbody id="tabla-items"></tbody>
       </table>
+      <span class="error-msg" id="err-items"></span>
       <label>Observaciones generales</label>
       <textarea name="observaciones">${datosHoja1.observaciones||''}</textarea>
       <hr>
       <label>Evidencias fotográficas</label>
       <div id="evidencias1"></div>
       <hr>
-      <label>Firma del funcionario*</label>
+      <label>Firma del funcionario*<span class="error-msg" id="err-firma"></span></label>
       <div>
         <canvas id="firma1" width="300" height="80"></canvas>
         <button type="button" id="limpiarFirma1">Limpiar firma</button>
       </div>
-      <label>Nombre*</label>
+      <label>Nombre*<span class="error-msg" id="err-nombreFuncionario"></span></label>
       <input name="nombreFuncionario" required value="${datosHoja1.nombreFuncionario||''}" />
-      <label>Fecha elaboración informe*</label>
+      <label>Fecha elaboración informe*<span class="error-msg" id="err-fechaElaboracion"></span></label>
       <input name="fechaElaboracion" type="date" required value="${datosHoja1.fechaElaboracion||''}" />
       <button type="submit">Siguiente</button>
     </form>
@@ -324,19 +325,89 @@ function renderHoja1() {
     };
   });
 
+  // Validación personalizada
+  function mostrarError(id, msg) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = msg; el.style.color = '#e30613'; el.style.fontSize = '0.95em'; }
+  }
+  function limpiarError(id) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  }
+  function validarCamposHoja1() {
+    let fd = new FormData(document.getElementById('form1'));
+    let errores = [];
+    // Validar cada campo requerido
+    if (!fd.get('nombreEstacion') || fd.get('nombreEstacion').trim() === '') { mostrarError('err-nombreEstacion','Por favor, ingresa el nombre de la estación'); errores.push('nombreEstacion'); } else limpiarError('err-nombreEstacion');
+    if (!fd.get('categoria') || fd.get('categoria').trim() === '') { mostrarError('err-categoria','Selecciona la categoría'); errores.push('categoria'); } else limpiarError('err-categoria');
+    if (!fd.get('zona') || fd.get('zona').trim() === '') { mostrarError('err-zona','Ingresa la zona'); errores.push('zona'); } else limpiarError('err-zona');
+    if (!fd.get('responsable') || fd.get('responsable').trim() === '') { mostrarError('err-responsable','Ingresa el responsable'); errores.push('responsable'); } else limpiarError('err-responsable');
+    if (!fd.get('departamento') || fd.get('departamento').trim() === '') { mostrarError('err-departamento','Ingresa el departamento'); errores.push('departamento'); } else limpiarError('err-departamento');
+    if (!fd.get('fechaEjecucion') || fd.get('fechaEjecucion').trim() === '') { mostrarError('err-fechaEjecucion','Ingresa la fecha de ejecución'); errores.push('fechaEjecucion'); } else limpiarError('err-fechaEjecucion');
+    if (!fd.get('direccion') || fd.get('direccion').trim() === '') { mostrarError('err-direccion','Ingresa la dirección'); errores.push('direccion'); } else limpiarError('err-direccion');
+    // Validar items
+    let itemsOk = true;
+    for (let i = 0; i < 13; i++) {
+      if (!fd.get(`item${i}`) || fd.get(`item${i}`).trim() === '') itemsOk = false;
+    }
+    if (!itemsOk) { mostrarError('err-items','Responde todos los ítems de áreas comunes y locativos'); errores.push('items'); } else limpiarError('err-items');
+    // Validar firma
+    if (!firmas[0]) { mostrarError('err-firma','Por favor, firma el informe'); errores.push('firma'); } else limpiarError('err-firma');
+    if (!fd.get('nombreFuncionario') || fd.get('nombreFuncionario').trim() === '') { mostrarError('err-nombreFuncionario','Ingresa el nombre del funcionario'); errores.push('nombreFuncionario'); } else limpiarError('err-nombreFuncionario');
+    if (!fd.get('fechaElaboracion') || fd.get('fechaElaboracion').trim() === '') { mostrarError('err-fechaElaboracion','Ingresa la fecha de elaboración'); errores.push('fechaElaboracion'); } else limpiarError('err-fechaElaboracion');
+    return errores;
+  }
+  // Limpiar errores al escribir
+  Array.from(document.querySelectorAll('#form1 input, #form1 textarea, #form1 select')).forEach(el => {
+    el.oninput = () => {
+      switch (el.name) {
+        case 'nombreEstacion': limpiarError('err-nombreEstacion'); break;
+        case 'categoria': limpiarError('err-categoria'); break;
+        case 'zona': limpiarError('err-zona'); break;
+        case 'responsable': limpiarError('err-responsable'); break;
+        case 'departamento': limpiarError('err-departamento'); break;
+        case 'fechaEjecucion': limpiarError('err-fechaEjecucion'); break;
+        case 'direccion': limpiarError('err-direccion'); break;
+        case 'nombreFuncionario': limpiarError('err-nombreFuncionario'); break;
+        case 'fechaElaboracion': limpiarError('err-fechaElaboracion'); break;
+        default: break;
+      }
+      if (el.name && el.name.startsWith('item')) limpiarError('err-items');
+    };
+  });
   // Submit
   document.getElementById('form1').onsubmit = e => {
     e.preventDefault();
+    const errores = validarCamposHoja1();
+    if (errores.length > 0) {
+      const primer = errores[0];
+      let focusEl = null;
+      switch (primer) {
+        case 'nombreEstacion': focusEl = document.querySelector('input[name="nombreEstacion"]'); break;
+        case 'categoria': focusEl = document.querySelector('input[name="categoria"]'); break;
+        case 'zona': focusEl = document.querySelector('input[name="zona"]'); break;
+        case 'responsable': focusEl = document.querySelector('input[name="responsable"]'); break;
+        case 'departamento': focusEl = document.querySelector('input[name="departamento"]'); break;
+        case 'fechaEjecucion': focusEl = document.querySelector('input[name="fechaEjecucion"]'); break;
+        case 'direccion': focusEl = document.querySelector('input[name="direccion"]'); break;
+        case 'items': focusEl = document.querySelector('select[name="item0"]'); break;
+        case 'firma': focusEl = document.getElementById('firma1'); break;
+        case 'nombreFuncionario': focusEl = document.querySelector('input[name="nombreFuncionario"]'); break;
+        case 'fechaElaboracion': focusEl = document.querySelector('input[name="fechaElaboracion"]'); break;
+        default: break;
+      }
+      if (focusEl) focusEl.focus();
+      return;
+    }
     const fd = new FormData(e.target);
     datosHoja1 = Object.fromEntries(fd.entries());
     datosHoja1.items = [];
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0; i < 13; i++) {
       datosHoja1.items.push({
         respuesta: fd.get(`item${i}`),
         descripcion: fd.get(`descItem${i}`)
       });
     }
-    // Guardar evidencias y descripciones en datosHoja1
     datosHoja1.evidencias = [];
     for (let i = 0; i < 4; i++) {
       datosHoja1.evidencias.push({
@@ -344,24 +415,19 @@ function renderHoja1() {
         desc: document.getElementById(`desc1_${i}`).value
       });
     }
-    // Guardar firma
     datosHoja1.firma = firmas[0];
     guardarLocal();
-    if (validarHoja1(datosHoja1)) {
-      renderHoja2();
-    } else {
-      alert('Por favor, completa todos los campos requeridos.');
-    }
+    renderHoja2();
   };
 }
 
 function renderHoja2() {
   document.getElementById('app').innerHTML = `
-    <form id="form2">
+    <form id="form2" novalidate>
       <h2>Actividad Técnica en Estación</h2>
-      <label>Regional*</label>
+      <label>Regional*<span class="error-msg" id="err2-regional"></span></label>
       <input name="regional" required value="${datosHoja2.regional||''}" />
-      <label>Tipo de estación*</label>
+      <label>Tipo de estación*<span class="error-msg" id="err2-tipoEstacion"></span></label>
       <select name="tipoEstacion" required>
         <option value="">Tipo de estación</option>
         <option${datosHoja2.tipoEstacion==='TORRE CUADRADA'?' selected':''}>TORRE CUADRADA</option>
@@ -372,31 +438,31 @@ function renderHoja2() {
         <option${datosHoja2.tipoEstacion==='INDOOR'?' selected':''}>INDOOR</option>
         <option${datosHoja2.tipoEstacion==='VALLA'?' selected':''}>VALLA</option>
       </select>
-      <label>Fecha ejecución*</label>
+      <label>Fecha ejecución*<span class="error-msg" id="err2-fechaEjecucion"></span></label>
       <input name="fechaEjecucion" type="date" required value="${datosHoja2.fechaEjecucion||''}" />
-      <label>Tipo de sitio*</label>
+      <label>Tipo de sitio*<span class="error-msg" id="err2-tipoSitio"></span></label>
       <select name="tipoSitio" required>
         <option value="">Tipo de sitio</option>
         <option${datosHoja2.tipoSitio==='PROPIO'?' selected':''}>PROPIO</option>
         <option${datosHoja2.tipoSitio==='ARRENDADO'?' selected':''}>ARRENDADO</option>
       </select>
-      <label>Fecha fin de actividad*</label>
+      <label>Fecha fin de actividad*<span class="error-msg" id="err2-fechaFinActividad"></span></label>
       <input name="fechaFinActividad" type="date" required value="${datosHoja2.fechaFinActividad||''}" />
-      <label>Técnico*</label>
+      <label>Técnico*<span class="error-msg" id="err2-tecnico"></span></label>
       <input name="tecnico" required value="${datosHoja2.tecnico||''}" />
-      <label>¿Implica exclusión?*</label>
+      <label>¿Implica exclusión?*<span class="error-msg" id="err2-exclusion"></span></label>
       <select name="exclusion" required>
         <option value="">¿Implica exclusión?</option>
         <option${datosHoja2.exclusion==='SÍ'?' selected':''}>SÍ</option>
         <option${datosHoja2.exclusion==='NO'?' selected':''}>NO</option>
       </select>
-      <label>Tipo de actividad*</label>
+      <label>Tipo de actividad*<span class="error-msg" id="err2-tipoActividad"></span></label>
       <select name="tipoActividad" required>
         <option value="">Tipo de actividad</option>
         <option${datosHoja2.tipoActividad==='EMERGENCIA'?' selected':''}>EMERGENCIA</option>
         <option${datosHoja2.tipoActividad==='CORRECTIVO'?' selected':''}>CORRECTIVO</option>
       </select>
-      <label>Tipo de equipo en falla*</label>
+      <label>Tipo de equipo en falla*<span class="error-msg" id="err2-tipoEquipoFalla"></span></label>
       <select name="tipoEquipoFalla" required>
         <option value="">Tipo de equipo en falla</option>
         <option${datosHoja2.tipoEquipoFalla==='TX'?' selected':''}>TX</option>
@@ -410,19 +476,19 @@ function renderHoja2() {
       <input name="marca" value="${datosHoja2.marca||''}" />
       <label>Modelo</label>
       <input name="modelo" value="${datosHoja2.modelo||''}" />
-      <label>¿Presenta afectación de servicios?*</label>
+      <label>¿Presenta afectación de servicios?*<span class="error-msg" id="err2-afectacionServicios"></span></label>
       <select name="afectacionServicios" required>
         <option value="">¿Presenta afectación de servicios?</option>
         <option${datosHoja2.afectacionServicios==='SÍ'?' selected':''}>SÍ</option>
         <option${datosHoja2.afectacionServicios==='NO'?' selected':''}>NO</option>
       </select>
-      <label>¿Cambio?*</label>
+      <label>¿Cambio?*<span class="error-msg" id="err2-cambio"></span></label>
       <select name="cambio" required>
         <option value="">¿Cambio?</option>
         <option${datosHoja2.cambio==='SÍ'?' selected':''}>SÍ</option>
         <option${datosHoja2.cambio==='NO'?' selected':''}>NO</option>
       </select>
-      <label>¿Instalación?*</label>
+      <label>¿Instalación?*<span class="error-msg" id="err2-instalacion"></span></label>
       <select name="instalacion" required>
         <option value="">¿Instalación?</option>
         <option${datosHoja2.instalacion==='SÍ'?' selected':''}>SÍ</option>
@@ -448,7 +514,7 @@ function renderHoja2() {
       <hr>
       <label>Evidencias fotográficas</label>
       <div id="evidencias2"></div>
-      <label>¿Falla resuelta?*</label>
+      <label>¿Falla resuelta?*<span class="error-msg" id="err2-fallaResuelta"></span></label>
       <select name="fallaResuelta" required>
         <option value="">¿Falla resuelta?</option>
         <option${datosHoja2.fallaResuelta==='SÍ'?' selected':''}>SÍ</option>
@@ -536,13 +602,81 @@ function renderHoja2() {
     };
   });
 
-  // Submit
+  // Validación personalizada
+  function mostrarError2(id, msg) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = msg; el.style.color = '#e30613'; el.style.fontSize = '0.95em'; }
+  }
+  function limpiarError2(id) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  }
+  function validarCamposHoja2() {
+    let fd = new FormData(document.getElementById('form2'));
+    let errores = [];
+    if (!fd.get('regional') || fd.get('regional').trim() === '') { mostrarError2('err2-regional','Ingresa la regional'); errores.push('regional'); } else limpiarError2('err2-regional');
+    if (!fd.get('tipoEstacion') || fd.get('tipoEstacion').trim() === '') { mostrarError2('err2-tipoEstacion','Selecciona el tipo de estación'); errores.push('tipoEstacion'); } else limpiarError2('err2-tipoEstacion');
+    if (!fd.get('fechaEjecucion') || fd.get('fechaEjecucion').trim() === '') { mostrarError2('err2-fechaEjecucion','Ingresa la fecha de ejecución'); errores.push('fechaEjecucion'); } else limpiarError2('err2-fechaEjecucion');
+    if (!fd.get('tipoSitio') || fd.get('tipoSitio').trim() === '') { mostrarError2('err2-tipoSitio','Selecciona el tipo de sitio'); errores.push('tipoSitio'); } else limpiarError2('err2-tipoSitio');
+    if (!fd.get('fechaFinActividad') || fd.get('fechaFinActividad').trim() === '') { mostrarError2('err2-fechaFinActividad','Ingresa la fecha fin de actividad'); errores.push('fechaFinActividad'); } else limpiarError2('err2-fechaFinActividad');
+    if (!fd.get('tecnico') || fd.get('tecnico').trim() === '') { mostrarError2('err2-tecnico','Ingresa el nombre del técnico'); errores.push('tecnico'); } else limpiarError2('err2-tecnico');
+    if (!fd.get('exclusion') || fd.get('exclusion').trim() === '') { mostrarError2('err2-exclusion','Selecciona si implica exclusión'); errores.push('exclusion'); } else limpiarError2('err2-exclusion');
+    if (!fd.get('tipoActividad') || fd.get('tipoActividad').trim() === '') { mostrarError2('err2-tipoActividad','Selecciona el tipo de actividad'); errores.push('tipoActividad'); } else limpiarError2('err2-tipoActividad');
+    if (!fd.get('tipoEquipoFalla') || fd.get('tipoEquipoFalla').trim() === '') { mostrarError2('err2-tipoEquipoFalla','Selecciona el tipo de equipo en falla'); errores.push('tipoEquipoFalla'); } else limpiarError2('err2-tipoEquipoFalla');
+    if (!fd.get('afectacionServicios') || fd.get('afectacionServicios').trim() === '') { mostrarError2('err2-afectacionServicios','Selecciona si presenta afectación de servicios'); errores.push('afectacionServicios'); } else limpiarError2('err2-afectacionServicios');
+    if (!fd.get('cambio') || fd.get('cambio').trim() === '') { mostrarError2('err2-cambio','Selecciona si hubo cambio'); errores.push('cambio'); } else limpiarError2('err2-cambio');
+    if (!fd.get('instalacion') || fd.get('instalacion').trim() === '') { mostrarError2('err2-instalacion','Selecciona si hubo instalación'); errores.push('instalacion'); } else limpiarError2('err2-instalacion');
+    if (!fd.get('fallaResuelta') || fd.get('fallaResuelta').trim() === '') { mostrarError2('err2-fallaResuelta','Selecciona si la falla fue resuelta'); errores.push('fallaResuelta'); } else limpiarError2('err2-fallaResuelta');
+    return errores;
+  }
+  Array.from(document.querySelectorAll('#form2 input, #form2 textarea, #form2 select')).forEach(el => {
+    el.oninput = () => {
+      switch (el.name) {
+        case 'regional': limpiarError2('err2-regional'); break;
+        case 'tipoEstacion': limpiarError2('err2-tipoEstacion'); break;
+        case 'fechaEjecucion': limpiarError2('err2-fechaEjecucion'); break;
+        case 'tipoSitio': limpiarError2('err2-tipoSitio'); break;
+        case 'fechaFinActividad': limpiarError2('err2-fechaFinActividad'); break;
+        case 'tecnico': limpiarError2('err2-tecnico'); break;
+        case 'exclusion': limpiarError2('err2-exclusion'); break;
+        case 'tipoActividad': limpiarError2('err2-tipoActividad'); break;
+        case 'tipoEquipoFalla': limpiarError2('err2-tipoEquipoFalla'); break;
+        case 'afectacionServicios': limpiarError2('err2-afectacionServicios'); break;
+        case 'cambio': limpiarError2('err2-cambio'); break;
+        case 'instalacion': limpiarError2('err2-instalacion'); break;
+        case 'fallaResuelta': limpiarError2('err2-fallaResuelta'); break;
+        default: break;
+      }
+    };
+  });
   document.getElementById('form2').onsubmit = e => {
     e.preventDefault();
+    const errores = validarCamposHoja2();
+    if (errores.length > 0) {
+      const primer = errores[0];
+      let focusEl = null;
+      switch (primer) {
+        case 'regional': focusEl = document.querySelector('input[name="regional"]'); break;
+        case 'tipoEstacion': focusEl = document.querySelector('select[name="tipoEstacion"]'); break;
+        case 'fechaEjecucion': focusEl = document.querySelector('input[name="fechaEjecucion"]'); break;
+        case 'tipoSitio': focusEl = document.querySelector('select[name="tipoSitio"]'); break;
+        case 'fechaFinActividad': focusEl = document.querySelector('input[name="fechaFinActividad"]'); break;
+        case 'tecnico': focusEl = document.querySelector('input[name="tecnico"]'); break;
+        case 'exclusion': focusEl = document.querySelector('select[name="exclusion"]'); break;
+        case 'tipoActividad': focusEl = document.querySelector('select[name="tipoActividad"]'); break;
+        case 'tipoEquipoFalla': focusEl = document.querySelector('select[name="tipoEquipoFalla"]'); break;
+        case 'afectacionServicios': focusEl = document.querySelector('select[name="afectacionServicios"]'); break;
+        case 'cambio': focusEl = document.querySelector('select[name="cambio"]'); break;
+        case 'instalacion': focusEl = document.querySelector('select[name="instalacion"]'); break;
+        case 'fallaResuelta': focusEl = document.querySelector('select[name="fallaResuelta"]'); break;
+        default: break;
+      }
+      if (focusEl) focusEl.focus();
+      return;
+    }
     const fd = new FormData(e.target);
     datosHoja2 = Object.fromEntries(fd.entries());
     datosHoja2.repuestos = repuestos;
-    // Guardar evidencias y descripciones en datosHoja2
     datosHoja2.evidencias = [];
     for (let i = 0; i < 6; i++) {
       datosHoja2.evidencias.push({
@@ -551,11 +685,7 @@ function renderHoja2() {
       });
     }
     guardarLocal();
-    if (validarHoja2(datosHoja2)) {
-      renderPrevisualizacion();
-    } else {
-      alert('Por favor, completa todos los campos requeridos.');
-    }
+    renderPrevisualizacion();
   };
   document.getElementById('volver1').onclick = renderHoja1;
 }
@@ -688,6 +818,8 @@ function renderPrevisualizacion() {
         evidencias2 = [null, null, null, null, null, null];
         firmas = [null];
         renderHoja1();
+        // Mostrar modal de éxito
+        mostrarModalExitoPDF();
       }, 1000);
     });
   };
@@ -1027,20 +1159,44 @@ function generarPDF(hoja1, hoja2, cb) {
   document.body.appendChild(div2);
   renderHtmlInstitucional(div1, hoja1, hoja2, 1);
   renderHtmlInstitucional(div2, hoja1, hoja2, 2);
-
   setTimeout(() => {
     html2canvas(div1, {backgroundColor: "#fff", scale:3, useCORS: true}).then(canvas1 => {
       html2canvas(div2, {backgroundColor: "#fff", scale:3, useCORS: true}).then(canvas2 => {
         pdf.addImage(canvas1.toDataURL('image/jpeg',1.0), 'JPEG', 0, 0, 700, 990);
         pdf.addPage([700,990]);
         pdf.addImage(canvas2.toDataURL('image/jpeg',1.0), 'JPEG', 0, 0, 700, 990);
-        pdf.save('informe-claro.pdf');
+        // Guardar PDF con nombre personalizado
+        let nombreEstacion = hoja1.nombreEstacion || '';
+        pdf.save('Informe Tecnico Exclusion ' + nombreEstacion + '.pdf');
         document.body.removeChild(div1);
         document.body.removeChild(div2);
         if (cb) cb();
       });
     });
   }, 500);
+}
+
+// Modal de éxito PDF
+function mostrarModalExitoPDF() {
+  let modal = document.createElement('div');
+  modal.style.position = 'fixed';
+  modal.style.top = 0;
+  modal.style.left = 0;
+  modal.style.width = '100vw';
+  modal.style.height = '100vh';
+  modal.style.background = 'rgba(0,0,0,0.35)';
+  modal.style.display = 'flex';
+  modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center';
+  modal.style.zIndex = 99999;
+  modal.innerHTML = `<div style="background:#fff;padding:32px 24px;border-radius:12px;box-shadow:0 2px 16px #0003;text-align:center;max-width:90vw;">
+    <div style="font-size:1.2em;font-weight:bold;margin-bottom:16px;color:#222;">El PDF se descargó con éxito</div>
+    <button id="cerrar-modal-exito" style="background:#e30613;color:#fff;border:none;padding:8px 24px;border-radius:6px;font-size:1em;cursor:pointer;">Aceptar</button>
+  </div>`;
+  document.body.appendChild(modal);
+  document.getElementById('cerrar-modal-exito').onclick = () => {
+    document.body.removeChild(modal);
+  };
 }
 
 // --- Flujo de inicio seguro ---
