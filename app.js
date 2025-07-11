@@ -1301,7 +1301,10 @@ function generarPDF(hoja1, hoja2, cb) {
         pdf.save('Informe Tecnico Exclusion ' + nombreEstacion + '.pdf');
         document.body.removeChild(div1);
         document.body.removeChild(div2);
-        if (cb) cb();
+        // Espera un poco para asegurar que la descarga se inicie antes de mostrar el modal
+        setTimeout(() => {
+          if (cb) cb();
+        }, 500);
       });
     });
   }, 500);
