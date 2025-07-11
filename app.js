@@ -219,7 +219,6 @@ function renderHoja1() {
           <option value="">-</option>
           <option${itemsGuardados[i]?.respuesta==='SÍ'?' selected':''}>SÍ</option>
           <option${itemsGuardados[i]?.respuesta==='NO'?' selected':''}>NO</option>
-          <option${itemsGuardados[i]?.respuesta==='NC'?' selected':''}>NC</option>
         </select>
         <div class="error-msg" id="err-item${i}"></div>
       </td>
@@ -284,7 +283,7 @@ function renderHoja1() {
   }
   let drawing = false;
   canvas.onmousedown = e => { drawing = true; ctx.beginPath(); };
-  canvas.onmouseup = e => { drawing = false; firmas[0] = canvas.toDataURL(); datosHoja1.firma = firmas[0]; guardarLocal(); };
+  canvas.onmouseup = e => { drawing = false; firmas[0] = canvas.toDataURL(); datosHoja1.firma = firmas[0]; guardarLocal(); limpiarError('err-firma'); };
   canvas.onmousemove = e => {
     if (!drawing) return;
     let rect = canvas.getBoundingClientRect();
@@ -298,7 +297,7 @@ function renderHoja1() {
   };
   // Touch
   canvas.addEventListener('touchstart', e => { drawing = true; ctx.beginPath(); });
-  canvas.addEventListener('touchend', e => { drawing = false; firmas[0] = canvas.toDataURL(); datosHoja1.firma = firmas[0]; guardarLocal(); });
+  canvas.addEventListener('touchend', e => { drawing = false; firmas[0] = canvas.toDataURL(); datosHoja1.firma = firmas[0]; guardarLocal(); limpiarError('err-firma'); });
   canvas.addEventListener('touchmove', e => {
     if (!drawing) return;
     let rect = canvas.getBoundingClientRect();
@@ -317,7 +316,14 @@ function renderHoja1() {
     firmas[0] = null;
     datosHoja1.firma = null;
     guardarLocal();
+    mostrarError('err-firma','Por favor, firma el informe');
   };
+  // Mueve el error justo debajo del canvas
+  let firmaDiv = canvas.parentNode;
+  let errFirma = document.getElementById('err-firma');
+  if (firmaDiv && errFirma) {
+    firmaDiv.appendChild(errFirma);
+  }
 
   // Guardado en cada cambio
   Array.from(document.querySelectorAll('#form1 input, #form1 textarea, #form1 select')).forEach(el => {
@@ -354,7 +360,8 @@ function renderHoja1() {
         'err-fechaEjecucion': 'input[name="fechaEjecucion"]',
         'err-direccion': 'input[name="direccion"]',
         'err-nombreFuncionario': 'input[name="nombreFuncionario"]',
-        'err-fechaElaboracion': 'input[name="fechaElaboracion"]'
+        'err-fechaElaboracion': 'input[name="fechaElaboracion"]',
+        'err-firma': '#firma1'
       };
       if (map[id]) {
         const inp = document.querySelector(map[id]);
@@ -380,7 +387,8 @@ function renderHoja1() {
         'err-fechaEjecucion': 'input[name="fechaEjecucion"]',
         'err-direccion': 'input[name="direccion"]',
         'err-nombreFuncionario': 'input[name="nombreFuncionario"]',
-        'err-fechaElaboracion': 'input[name="fechaElaboracion"]'
+        'err-fechaElaboracion': 'input[name="fechaElaboracion"]',
+        'err-firma': '#firma1'
       };
       if (map[id]) {
         const inp = document.querySelector(map[id]);
@@ -438,21 +446,32 @@ function renderHoja1() {
     if (errores.length > 0) {
       const primer = errores[0];
       let focusEl = null;
-      switch (primer) {
-        case 'nombreEstacion': focusEl = document.querySelector('input[name="nombreEstacion"]'); break;
-        case 'categoria': focusEl = document.querySelector('input[name="categoria"]'); break;
-        case 'zona': focusEl = document.querySelector('input[name="zona"]'); break;
-        case 'responsable': focusEl = document.querySelector('input[name="responsable"]'); break;
-        case 'departamento': focusEl = document.querySelector('input[name="departamento"]'); break;
-        case 'fechaEjecucion': focusEl = document.querySelector('input[name="fechaEjecucion"]'); break;
-        case 'direccion': focusEl = document.querySelector('input[name="direccion"]'); break;
-        case 'items': focusEl = document.querySelector('select[name="item0"]'); break;
-        case 'firma': focusEl = document.getElementById('firma1'); break;
-        case 'nombreFuncionario': focusEl = document.querySelector('input[name="nombreFuncionario"]'); break;
-        case 'fechaElaboracion': focusEl = document.querySelector('input[name="fechaElaboracion"]'); break;
-        default: break;
+      if (primer.startsWith('item')) {
+        const idx = parseInt(primer.replace('item',''));
+        focusEl = document.querySelector(`select[name="item${idx}"]`);
+        if (focusEl) {
+          focusEl.focus();
+          focusEl.scrollIntoView({behavior:'smooth',block:'center'});
+        }
+      } else {
+        switch (primer) {
+          case 'nombreEstacion': focusEl = document.querySelector('input[name="nombreEstacion"]'); break;
+          case 'categoria': focusEl = document.querySelector('input[name="categoria"]'); break;
+          case 'zona': focusEl = document.querySelector('input[name="zona"]'); break;
+          case 'responsable': focusEl = document.querySelector('input[name="responsable"]'); break;
+          case 'departamento': focusEl = document.querySelector('input[name="departamento"]'); break;
+          case 'fechaEjecucion': focusEl = document.querySelector('input[name="fechaEjecucion"]'); break;
+          case 'direccion': focusEl = document.querySelector('input[name="direccion"]'); break;
+          case 'firma': focusEl = document.getElementById('firma1'); break;
+          case 'nombreFuncionario': focusEl = document.querySelector('input[name="nombreFuncionario"]'); break;
+          case 'fechaElaboracion': focusEl = document.querySelector('input[name="fechaElaboracion"]'); break;
+          default: break;
+        }
+        if (focusEl) {
+          focusEl.focus();
+          focusEl.scrollIntoView({behavior:'smooth',block:'center'});
+        }
       }
-      if (focusEl) focusEl.focus();
       return;
     }
     const fd = new FormData(e.target);
