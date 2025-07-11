@@ -231,8 +231,8 @@ body {
     box-sizing: border-box;
   }
   #tabla-items td:last-child input {
-    width: 98%;
-    min-width: 120px;
+    width: 80%;
+    min-width: 80px;
     height: 40px;
     font-size: 1.05em;
     padding: 6px 8px;
