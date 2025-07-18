@@ -523,6 +523,9 @@ function renderHoja2(fromHome) {
     </div>
     <form id="form2" novalidate>
       <h2>Actividad Técnica en Estación</h2>
+      <label>Nombre de estación*</label>
+      <input name="nombreEstacion" required value="${datosHoja2.nombreEstacion||''}" />
+      <div class="error-msg" id="err2-nombreEstacion"></div>
       <label>Regional*</label>
       <input name="regional" required value="${datosHoja2.regional||''}" />
       <div class="error-msg" id="err2-regional"></div>
@@ -734,6 +737,7 @@ function renderHoja2(fromHome) {
     if (el) { el.textContent = msg; el.style.color = '#e30613'; el.style.fontSize = '0.95em'; }
     // resalta el campo
     const map = {
+      'err2-nombreEstacion': 'input[name="nombreEstacion"]',
       'err2-regional': 'input[name="regional"]',
       'err2-tipoEstacion': 'select[name="tipoEstacion"]',
       'err2-fechaEjecucion': 'input[name="fechaEjecucion"]',
@@ -758,6 +762,7 @@ function renderHoja2(fromHome) {
     if (el) el.textContent = '';
     // quita el borde rojo
     const map = {
+      'err2-nombreEstacion': 'input[name="nombreEstacion"]',
       'err2-regional': 'input[name="regional"]',
       'err2-tipoEstacion': 'select[name="tipoEstacion"]',
       'err2-fechaEjecucion': 'input[name="fechaEjecucion"]',
@@ -780,6 +785,7 @@ function renderHoja2(fromHome) {
   function validarCamposHoja2() {
     let fd = new FormData(document.getElementById('form2'));
     let errores = [];
+    if (!fd.get('nombreEstacion') || fd.get('nombreEstacion').trim() === '') { mostrarError2('err2-nombreEstacion','Por favor, ingresa el nombre de la estación'); errores.push('nombreEstacion'); } else limpiarError2('err2-nombreEstacion');
     if (!fd.get('regional') || fd.get('regional').trim() === '') { mostrarError2('err2-regional','Ingresa la regional'); errores.push('regional'); } else limpiarError2('err2-regional');
     if (!fd.get('tipoEstacion') || fd.get('tipoEstacion').trim() === '') { mostrarError2('err2-tipoEstacion','Selecciona el tipo de estación'); errores.push('tipoEstacion'); } else limpiarError2('err2-tipoEstacion');
     if (!fd.get('fechaEjecucion') || fd.get('fechaEjecucion').trim() === '') { mostrarError2('err2-fechaEjecucion','Ingresa la fecha de ejecución'); errores.push('fechaEjecucion'); } else limpiarError2('err2-fechaEjecucion');
@@ -798,6 +804,7 @@ function renderHoja2(fromHome) {
   Array.from(document.querySelectorAll('#form2 input, #form2 textarea, #form2 select')).forEach(el => {
     el.oninput = () => {
       switch (el.name) {
+        case 'nombreEstacion': limpiarError2('err2-nombreEstacion'); break;
         case 'regional': limpiarError2('err2-regional'); break;
         case 'tipoEstacion': limpiarError2('err2-tipoEstacion'); break;
         case 'fechaEjecucion': limpiarError2('err2-fechaEjecucion'); break;
@@ -822,6 +829,7 @@ function renderHoja2(fromHome) {
       const primer = errores[0];
       let focusEl = null;
       switch (primer) {
+        case 'nombreEstacion': focusEl = document.querySelector('input[name="nombreEstacion"]'); break;
         case 'regional': focusEl = document.querySelector('input[name="regional"]'); break;
         case 'tipoEstacion': focusEl = document.querySelector('select[name="tipoEstacion"]'); break;
         case 'fechaEjecucion': focusEl = document.querySelector('input[name="fechaEjecucion"]'); break;
@@ -1226,7 +1234,7 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
           <table style="width:100%;border-collapse:collapse;font-size:12px;">
           <tr>
               <td style="border:1px solid #000;font-weight:bold;width:20%;">NOMBRE DE ESTACIÓN:</td>
-              <td style="border:1px solid #000;width:30%;">${hoja1.nombreEstacion||''}</td>
+              <td style="border:1px solid #000;width:30%;">${hoja2.nombreEstacion||''}</td>
               <td style="border:1px solid #000;font-weight:bold;width:20%;">REGIONAL:</td>
               <td style="border:1px solid #000;width:30%;">${hoja2.regional||''}</td>
           </tr>
