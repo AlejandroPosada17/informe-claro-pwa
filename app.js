@@ -132,10 +132,19 @@ function abrirCamara(callback) {
 }
 
 // --- Renderiza la pantalla inicial ---
-function renderHoja1() {
+function renderHoja1(fromHome) {
   document.getElementById('app').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;margin-bottom:8px;">
+      <button id="backHome1" style="background:#fff;border:none;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px #0001;cursor:pointer;margin-left:8px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="12" fill="#fff"/>
+          <path d="M15.5 19L9.5 12L15.5 5" stroke="#e30613" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <img src="logo-claro.png" alt="Logo Claro" style="width:100px;display:block;margin:0 auto;">
+      <div style="width:44px;height:44px;"></div>
+    </div>
     <form id="form1" novalidate>
-      <img src="logo-claro.png" alt="Logo Claro" style="width:100px;display:block;margin:auto;">
       <h2>Estado General de Estación</h2>
       <label>Nombre de estación*</label>
       <input name="nombreEstacion" required value="${datosHoja1.nombreEstacion||''}" />
@@ -189,7 +198,8 @@ function renderHoja1() {
       <label>Fecha elaboración informe*</label>
       <input name="fechaElaboracion" type="date" required value="${datosHoja1.fechaElaboracion||''}" />
       <div class="error-msg" id="err-fechaElaboracion"></div>
-      <button type="submit">Siguiente</button>
+      <button type="submit" style="background:#e30613;color:#fff;">Generar PDF</button>
+      <button type="button" id="volverHome1" style="background:#eee;color:#222;">Volver al inicio</button>
     </form>
   `;
   window.scrollTo({top:0,behavior:'auto'});
@@ -493,12 +503,24 @@ function renderHoja1() {
     }
     datosHoja1.firma = firmas[0];
     guardarLocal();
-      renderHoja2();
+      renderPrevisualizacion1();
   };
+  document.getElementById('volverHome1').onclick = renderHome;
+  document.getElementById('backHome1').onclick = renderHome;
 }
 
-function renderHoja2() {
+function renderHoja2(fromHome) {
   document.getElementById('app').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;margin-bottom:8px;">
+      <button id="backHome2" style="background:#fff;border:none;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px #0001;cursor:pointer;margin-left:8px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="12" fill="#fff"/>
+          <path d="M15.5 19L9.5 12L15.5 5" stroke="#e30613" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <img src="logo-claro.png" alt="Logo Claro" style="width:100px;display:block;margin:0 auto;">
+      <div style="width:44px;height:44px;"></div>
+    </div>
     <form id="form2" novalidate>
       <h2>Actividad Técnica en Estación</h2>
       <label>Regional*</label>
@@ -611,8 +633,8 @@ function renderHoja2() {
       <div class="error-msg" id="err2-fallaResuelta"></div>
       <label>Observaciones de la actividad</label>
       <textarea name="observacionesActividad">${datosHoja2.observacionesActividad||''}</textarea>
-      <button type="submit">Generar PDF</button>
-      <button type="button" id="volver1">Volver</button>
+      <button type="submit" style="background:#e30613;color:#fff;">Generar PDF</button>
+      <button type="button" id="volverHome2" style="background:#eee;color:#222;">Volver al inicio</button>
     </form>
   `;
   window.scrollTo({top:0,behavior:'auto'});
@@ -832,16 +854,16 @@ function renderHoja2() {
       });
     }
     guardarLocal();
-      renderPrevisualizacion();
+      renderPrevisualizacion2();
   };
-  document.getElementById('volver1').onclick = renderHoja1;
+  document.getElementById('volverHome2').onclick = renderHome;
+  document.getElementById('backHome2').onclick = renderHome;
 }
 
-function renderPrevisualizacion() {
-  // Forzar scroll al inicio ANTES de mostrar el loader y el contenido
+// --- Previsualización y descarga para Estado General (solo una página) ---
+function renderPrevisualizacion1() {
   window.scrollTo({top:0,behavior:'auto'});
-
-  // Mostrar loader overlay en body INMEDIATAMENTE antes de cualquier renderizado
+  // Mostrar loader overlay antes de renderizar
   let loaderOverlay = document.createElement('div');
   loaderOverlay.id = 'loader-overlay-pdf';
   loaderOverlay.style.position = 'fixed';
@@ -863,8 +885,6 @@ function renderPrevisualizacion() {
     </div>
   `;
   document.body.appendChild(loaderOverlay);
-
-  // Loader/progress bar logic
   let loaderBar = loaderOverlay.querySelector('#loader-bar');
   let loaderInterval = null;
   let progress = 0;
@@ -880,40 +900,25 @@ function renderPrevisualizacion() {
     setTimeout(() => {
       if (loaderOverlay && loaderOverlay.parentNode) loaderOverlay.parentNode.removeChild(loaderOverlay);
       document.getElementById('canvas-container1').style.visibility = 'visible';
-      document.getElementById('canvas-container2').style.visibility = 'visible';
     }, 350);
   }
-
-  // Ahora sí, renderizar el resto de la UI
   document.getElementById('app').innerHTML = `
     <h2>Previsualización del informe</h2>
-    <div class="paginador">
-      <button id="btnPag1" class="active">Página 1</button>
-      <button id="btnPag2">Página 2</button>
-    </div>
-    <div class="previsualizacion-pdf" id="previsualizacion-pdf">
-      <div id="canvas-container1" style="display:block;text-align:center;visibility:hidden;"></div>
-      <div id="canvas-container2" style="display:none;text-align:center;visibility:hidden;"></div>
-    </div>
+    <div id="canvas-container1" style="display:block;text-align:center;visibility:hidden;"></div>
     <div style="display:flex;justify-content:center;gap:16px;margin-top:16px;">
-    <button id="descargar">Descargar PDF</button>
-    <button id="editar">Editar datos</button>
+      <button id="descargar1" style="background:#e30613;color:#fff;">Descargar PDF</button>
+      <button id="editar1" style="background:#e30613;color:#fff;">Editar datos</button>
+      <button id="volverHome1" style="background:#eee;color:#222;">Volver al inicio</button>
     </div>
   `;
-
-  renderHtmlInstitucional(document.getElementById('canvas-container1'), datosHoja1, datosHoja2, 1);
-  renderHtmlInstitucional(document.getElementById('canvas-container2'), datosHoja1, datosHoja2, 2);
-
-  // Renderizar canvas para ambas páginas
+  // Renderizar HTML institucional y canvas
   setTimeout(() => {
-    // Página 1
     let tempDiv1 = document.createElement('div');
     tempDiv1.style.position = 'absolute';
     tempDiv1.style.left = '-9999px';
     tempDiv1.id = 'html-pagina1';
     document.body.appendChild(tempDiv1);
-    renderHtmlInstitucional(tempDiv1, datosHoja1, datosHoja2, 1);
-
+    renderHtmlInstitucional(tempDiv1, datosHoja1, {}, 1);
     html2canvas(tempDiv1, {backgroundColor: "#fff", useCORS: true}).then(c1 => {
       let cont1 = document.getElementById('canvas-container1');
       while (cont1.firstChild) cont1.removeChild(cont1.firstChild);
@@ -921,54 +926,145 @@ function renderPrevisualizacion() {
       c1.style.height = 'auto';
       cont1.appendChild(c1);
       document.body.removeChild(tempDiv1);
-      // Página 2
-      let tempDiv2 = document.createElement('div');
-      tempDiv2.style.position = 'absolute';
-      tempDiv2.style.left = '-9999px';
-      tempDiv2.id = 'html-pagina2';
-      document.body.appendChild(tempDiv2);
-      renderHtmlInstitucional(tempDiv2, datosHoja1, datosHoja2, 2);
-      html2canvas(tempDiv2, {backgroundColor: "#fff", useCORS: true}).then(c2 => {
-        let cont2 = document.getElementById('canvas-container2');
-        while (cont2.firstChild) cont2.removeChild(cont2.firstChild);
-        c2.style.width = '100%';
-        c2.style.height = 'auto';
-        cont2.appendChild(c2);
-        document.body.removeChild(tempDiv2);
-        finishLoader();
-      });
+      finishLoader();
     });
   }, 100);
-
-  // Botones de paginación
-  document.getElementById('btnPag1').onclick = () => {
-    document.getElementById('canvas-container1').style.display = 'block';
-    document.getElementById('canvas-container2').style.display = 'none';
-    document.getElementById('btnPag1').classList.add('active');
-    document.getElementById('btnPag2').classList.remove('active');
-  };
-  document.getElementById('btnPag2').onclick = () => {
-    document.getElementById('canvas-container1').style.display = 'none';
-    document.getElementById('canvas-container2').style.display = 'block';
-    document.getElementById('btnPag2').classList.add('active');
-    document.getElementById('btnPag1').classList.remove('active');
-  };
-
-  document.getElementById('descargar').onclick = () => {
-    generarPDF(datosHoja1, datosHoja2, () => {
+  document.getElementById('descargar1').onclick = () => {
+    generarPDF1(datosHoja1, () => {
       localStorage.removeItem('datosHoja1');
-      localStorage.removeItem('datosHoja2');
       setTimeout(() => {
         datosHoja1 = {};
-        datosHoja2 = {};
         evidencias1 = [null, null, null, null];
-        evidencias2 = [null, null, null, null, null, null];
         firmas = [null];
-        renderHoja1();
+        renderHome();
       }, 1000);
     });
   };
-  document.getElementById('editar').onclick = renderHoja1;
+  document.getElementById('editar1').onclick = () => renderHoja1(true);
+  document.getElementById('volverHome1').onclick = renderHome;
+  document.getElementById('backHome1').onclick = renderHome;
+}
+
+// --- Previsualización y descarga para Informe Técnico Exclusión (solo una página) ---
+function renderPrevisualizacion2() {
+  window.scrollTo({top:0,behavior:'auto'});
+  // Mostrar loader overlay antes de renderizar
+  let loaderOverlay = document.createElement('div');
+  loaderOverlay.id = 'loader-overlay-pdf';
+  loaderOverlay.style.position = 'fixed';
+  loaderOverlay.style.top = '0';
+  loaderOverlay.style.left = '0';
+  loaderOverlay.style.width = '100vw';
+  loaderOverlay.style.height = '100vh';
+  loaderOverlay.style.display = 'flex';
+  loaderOverlay.style.alignItems = 'center';
+  loaderOverlay.style.justifyContent = 'center';
+  loaderOverlay.style.zIndex = '9999';
+  loaderOverlay.style.background = 'rgba(255,255,255,0.85)';
+  loaderOverlay.innerHTML = `
+    <div style="text-align:center;">
+      <div style="font-size:18px;font-weight:bold;margin-bottom:16px;">Generando previsualización...</div>
+      <div style="width:220px;height:16px;background:#eee;border-radius:8px;overflow:hidden;display:inline-block;">
+        <div id="loader-bar" style="height:100%;width:0%;background:#e30613;transition:width 0.3s;"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(loaderOverlay);
+  let loaderBar = loaderOverlay.querySelector('#loader-bar');
+  let loaderInterval = null;
+  let progress = 0;
+  loaderBar.style.width = '0%';
+  loaderInterval = setInterval(() => {
+    progress += Math.random() * 10 + 5;
+    if (progress > 90) progress = 90;
+    loaderBar.style.width = progress + '%';
+  }, 200);
+  function finishLoader() {
+    if (loaderInterval) clearInterval(loaderInterval);
+    if (loaderBar) loaderBar.style.width = '100%';
+    setTimeout(() => {
+      if (loaderOverlay && loaderOverlay.parentNode) loaderOverlay.parentNode.removeChild(loaderOverlay);
+      document.getElementById('canvas-container2').style.visibility = 'visible';
+    }, 350);
+  }
+  document.getElementById('app').innerHTML = `
+    <h2>Previsualización del informe</h2>
+    <div id="canvas-container2" style="display:block;text-align:center;visibility:hidden;"></div>
+    <div style="display:flex;justify-content:center;gap:16px;margin-top:16px;">
+      <button id="descargar2" style="background:#e30613;color:#fff;">Descargar PDF</button>
+      <button id="editar2" style="background:#e30613;color:#fff;">Editar datos</button>
+      <button id="volverHome2" style="background:#eee;color:#222;">Volver al inicio</button>
+    </div>
+  `;
+  // Renderizar HTML institucional y canvas
+  setTimeout(() => {
+    let tempDiv2 = document.createElement('div');
+    tempDiv2.style.position = 'absolute';
+    tempDiv2.style.left = '-9999px';
+    tempDiv2.id = 'html-pagina2';
+    document.body.appendChild(tempDiv2);
+    renderHtmlInstitucional(tempDiv2, {}, datosHoja2, 2);
+    html2canvas(tempDiv2, {backgroundColor: "#fff", useCORS: true}).then(c2 => {
+      let cont2 = document.getElementById('canvas-container2');
+      while (cont2.firstChild) cont2.removeChild(cont2.firstChild);
+      c2.style.width = '100%';
+      c2.style.height = 'auto';
+      cont2.appendChild(c2);
+      document.body.removeChild(tempDiv2);
+      finishLoader();
+    });
+  }, 100);
+  document.getElementById('descargar2').onclick = () => {
+    generarPDF2(datosHoja2, () => {
+      localStorage.removeItem('datosHoja2');
+      setTimeout(() => {
+        datosHoja2 = {};
+        evidencias2 = [null, null, null, null, null, null];
+        renderHome();
+      }, 1000);
+    });
+  };
+  document.getElementById('editar2').onclick = () => renderHoja2(true);
+  document.getElementById('volverHome2').onclick = renderHome;
+  document.getElementById('backHome2').onclick = renderHome;
+}
+
+// --- Generación de PDF para cada informe ---
+function generarPDF1(hoja1, cb) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({unit:'pt',format:[700,990]});
+  let div1 = document.createElement('div');
+  div1.style.position = 'absolute';
+  div1.style.left = '-9999px';
+  div1.id = 'pdf-html1';
+  document.body.appendChild(div1);
+  renderHtmlInstitucional(div1, hoja1, {}, 1);
+  setTimeout(() => {
+    html2canvas(div1, {backgroundColor: "#fff", scale:3, useCORS: true}).then(canvas1 => {
+      pdf.addImage(canvas1.toDataURL('image/jpeg',1.0), 'JPEG', 0, 0, 700, 990);
+      pdf.save('Estado General ' + (hoja1.nombreEstacion || '') + '.pdf');
+      document.body.removeChild(div1);
+      if (cb) cb();
+    });
+  }, 500);
+}
+function generarPDF2(hoja2, cb) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({unit:'pt',format:[700,990]});
+  let div2 = document.createElement('div');
+  div2.style.position = 'absolute';
+  div2.style.left = '-9999px';
+  div2.id = 'pdf-html2';
+  document.body.appendChild(div2);
+  renderHtmlInstitucional(div2, {}, hoja2, 2);
+  setTimeout(() => {
+    html2canvas(div2, {backgroundColor: "#fff", scale:3, useCORS: true}).then(canvas2 => {
+      pdf.addImage(canvas2.toDataURL('image/jpeg',1.0), 'JPEG', 0, 0, 700, 990);
+      pdf.save('Informe Tecnico Exclusion ' + (hoja2.nombreEstacion || '') + '.pdf');
+      document.body.removeChild(div2);
+      if (cb) cb();
+    });
+  }, 500);
 }
 
 // --- Renderiza el HTML institucional con los datos ---
@@ -1288,61 +1384,18 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
   divElem.innerHTML = html;
 }
 
-// --- Genera el PDF con el formato institucional ---
-function generarPDF(hoja1, hoja2, cb) {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({unit:'pt',format:[700,990]});
-  let div1 = document.createElement('div');
-  div1.style.position = 'absolute';
-  div1.style.left = '-9999px';
-  div1.id = 'pdf-html1';
-  document.body.appendChild(div1);
-  let div2 = document.createElement('div');
-  div2.style.position = 'absolute';
-  div2.style.left = '-9999px';
-  div2.id = 'pdf-html2';
-  document.body.appendChild(div2);
-  renderHtmlInstitucional(div1, hoja1, hoja2, 1);
-  renderHtmlInstitucional(div2, hoja1, hoja2, 2);
-  setTimeout(() => {
-    html2canvas(div1, {backgroundColor: "#fff", scale:3, useCORS: true}).then(canvas1 => {
-      html2canvas(div2, {backgroundColor: "#fff", scale:3, useCORS: true}).then(canvas2 => {
-        pdf.addImage(canvas1.toDataURL('image/jpeg',1.0), 'JPEG', 0, 0, 700, 990);
-        pdf.addPage([700,990]);
-        pdf.addImage(canvas2.toDataURL('image/jpeg',1.0), 'JPEG', 0, 0, 700, 990);
-        let nombreEstacion = hoja1.nombreEstacion || '';
-        let modalMostrado = false;
-        function onFocus() {
-          if (!modalMostrado) {
-            modalMostrado = true;
-            window.removeEventListener('focus', onFocus);
-            if (cb) cb();
-          }
-        }
-        window.addEventListener('focus', onFocus);
-        pdf.save('Informe Tecnico Exclusion ' + nombreEstacion + '.pdf');
-        document.body.removeChild(div1);
-        document.body.removeChild(div2);
-        // Si el usuario no cambia de ventana (descarga automática), muestra el modal tras 2 segundos como fallback
-        setTimeout(() => {
-          if (!modalMostrado) {
-            modalMostrado = true;
-            window.removeEventListener('focus', onFocus);
-        if (cb) cb();
-          }
-        }, 2000);
-      });
-    });
-  }, 500);
+// --- Nueva pantalla principal ---
+function renderHome() {
+  document.getElementById('app').innerHTML = `
+    <div style="text-align:center;margin-top:32px;">
+      <img src="logo-claro.png" alt="Logo Claro" style="width:120px;display:block;margin:0 auto 24px auto;">
+      <button id="btnEstadoGeneral" style="width:90%;max-width:400px;font-size:1.3em;padding:18px 0;margin:16px auto;display:block;background:#e30613;color:#fff;border:none;border-radius:8px;">Estado General</button>
+      <button id="btnExclusion" style="width:90%;max-width:400px;font-size:1.3em;padding:18px 0;margin:16px auto;display:block;background:#e30613;color:#fff;border:none;border-radius:8px;">Informe Técnico Exclusión</button>
+    </div>
+  `;
+  document.getElementById('btnEstadoGeneral').onclick = () => renderHoja1(true);
+  document.getElementById('btnExclusion').onclick = () => renderHoja2(true);
 }
 
-// --- Flujo de inicio seguro ---
-if (validarHoja1(datosHoja1)) {
-  if (validarHoja2(datosHoja2)) {
-    renderPrevisualizacion();
-  } else {
-    renderHoja2();
-  }
-} else {
-  renderHoja1();
-}
+// --- Inicio seguro ---
+renderHome();
