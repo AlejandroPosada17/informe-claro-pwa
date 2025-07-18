@@ -1388,9 +1388,10 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
 function renderHome() {
   document.getElementById('app').innerHTML = `
     <div style="text-align:center;margin-top:32px;">
+      <h2 style="font-size:2em;font-weight:600;margin-bottom:16px;">Plataforma generación de informes</h2>
       <img src="logo-claro.png" alt="Logo Claro" style="width:120px;display:block;margin:0 auto 24px auto;">
-      <button id="btnEstadoGeneral" style="width:90%;max-width:400px;font-size:1.3em;padding:18px 0;margin:16px auto;display:block;background:#e30613;color:#fff;border:none;border-radius:8px;">Estado General</button>
       <button id="btnExclusion" style="width:90%;max-width:400px;font-size:1.3em;padding:18px 0;margin:16px auto;display:block;background:#e30613;color:#fff;border:none;border-radius:8px;">Informe Técnico Exclusión</button>
+      <button id="btnEstadoGeneral" style="width:90%;max-width:400px;font-size:1.3em;padding:18px 0;margin:16px auto;display:block;background:#e30613;color:#fff;border:none;border-radius:8px;">Informe Estado General</button>
     </div>
   `;
   document.getElementById('btnEstadoGeneral').onclick = () => renderHoja1(true);
