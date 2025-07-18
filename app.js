@@ -1388,10 +1388,12 @@ function renderHtmlInstitucional(divElem, hoja1, hoja2, pagina) {
 function renderHome() {
   document.getElementById('app').innerHTML = `
     <div class="main-home">
-      <h2 class="main-home-title">Plataforma generación de informes</h2>
-      <img src="logo-claro.png" alt="Logo Claro" class="main-home-logo">
-      <button id="btnExclusion" class="main-home-btn">Informe Técnico Exclusión</button>
-      <button id="btnEstadoGeneral" class="main-home-btn">Informe Estado General</button>
+      <div class="main-home-card">
+        <h2 class="main-home-title">Plataforma generación de informes</h2>
+        <img src="logo-claro.png" alt="Logo Claro" class="main-home-logo">
+        <button id="btnExclusion" class="main-home-btn">Informe Técnico Exclusión</button>
+        <button id="btnEstadoGeneral" class="main-home-btn">Informe Estado General</button>
+      </div>
     </div>
   `;
   document.getElementById('btnEstadoGeneral').onclick = () => renderHoja1(true);
