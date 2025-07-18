@@ -239,17 +239,35 @@ body {
   }
   /* Pantalla principal profesional */
 #app .main-home {
-  min-height: 100vh;
-  min-height: 100dvh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
   height: 100vh;
-  height: 100dvh;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 0;
-  background: linear-gradient(180deg, #f7f7f7 60%, #fff 100%);
+  margin: 0;
+  background: #f7f7f7;
+  box-sizing: border-box;
+}
+html, body {
+  width: 100vw;
+  height: 100vh;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+body {
+  background: #f7f7f7;
 }
 #app .main-home-title {
   font-size: 2.6em;
@@ -314,7 +332,13 @@ body {
 }
 @media (max-width: 600px) {
   #app .main-home {
-    padding: 0 2vw;
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: hidden;
   }
   #app .main-home-title {
     font-size: 1.45em;
